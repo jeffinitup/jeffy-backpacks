@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <option name="defaultObfuscationEnv" value="named:intermediary" />
+        <option name="inMapFileNamedIntermediary" value="$USER_HOME$/.gradle/caches/fabric-loom/1.6.4/btw.community.mappings.1_6_4.1.0.3-v2/mappings.tiny" />
+        <option name="outMapFileNamedIntermediary" value="$PROJECT_DIR$/build/loom-cache/mixin-map-btw.community.mappings.1_6_4.1.0.3-v2.main.tiny" />
+        <option name="outRefMapFile" value="$PROJECT_DIR$/build/classes/java/main/jeffy-backpacks-refmap.json" />
+        <option name="quiet" value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.github.llamalad7/mixinextras-common/0.5.0/286da96036621082491d971dfc62bee8fc37d161/mixinextras-common-0.5.0.jar" />
+        </processorPath>
+        <module name="Jeffy_Backpacks.main" />
+      </profile>
+    </annotationProcessing>
     <bytecodeTargetLevel target="17" />
   </component>
 </project>
