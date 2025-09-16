@@ -8,6 +8,7 @@ import net.minecraft.src.Item;
 
 public class JBItems {
     public static Item bundle = new ItemWithInventory(31000, new Pair<>(2, 2))
+            .hasSecondRenderPass()
             .jbp$cantBeWorn()
             .setCreativeTab(CreativeTabs.tabTools)
             .setUnlocalizedName("bundle")

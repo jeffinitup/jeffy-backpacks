@@ -7,8 +7,8 @@ import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 
 public class BackpackInventory implements IItemStackInventory {
-    protected ItemStack[] inventory;
     protected final int size;
+    public ItemStack[] inventory;
     public int currentSlotID;
 
     public BackpackInventory(ItemStack stack, int inventorySize) {

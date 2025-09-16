@@ -10,6 +10,7 @@ import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;
 import emi.shims.java.com.unascribed.retroemi.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 
 /**
@@ -32,7 +33,7 @@ public class ItemWithInventory extends ArmorItem
      * @param grid The grid size for storage and rendering
      */
     public ItemWithInventory(int id, Pair<Integer, Integer> grid) {
-        super(id, EnumArmorMaterial.CHAIN, 1, 1, 0);
+        super(id, EnumArmorMaterial.CLOTH, 1, 1, 0);
 
         this.damageReduceAmount = 0;
         this.inventorySize = grid.getLeft() * grid.getRight();
@@ -52,6 +53,15 @@ public class ItemWithInventory extends ArmorItem
             BackpackInventory inv = createInventory(stack);
             stack.stackTagCompound = inv.writeToNBT(stack.getTagCompound());
         }
+    }
+
+    /**
+     * Damage set to 1 indicates this item is dyed, for rendering purposes
+     */
+    @Override
+    public void func_82813_b(ItemStack stack, int color) {
+        super.func_82813_b(stack, color);
+        stack.setItemDamage(1);
     }
 
     //***       IItemExtendedInteraction        ***//
@@ -143,12 +153,13 @@ public class ItemWithInventory extends ArmorItem
     //***       Class specific methods        ***//
 
     /**
-     * Sends C2S sync packet for item inventory position
+     * Sets second render pass mode in this {@code ItemWithInventory}.
      */
-    @Environment(EnvType.CLIENT)
-    public void sendInventoryPositionPacket(int slotID, int currentSlot) {
-        PlayerControllerMP controller = Minecraft.getMinecraft().playerController;
-        JBPackets.sendInventoryPositionPacket(controller.getNetClientHandler(), slotID, currentSlot);
+    public ItemWithInventory hasSecondRenderPass() {
+        if (!MinecraftServer.getIsServer()) {
+            this.hasSecondPass = true;
+        }
+        return this;
     }
 
     /**
@@ -194,5 +205,56 @@ public class ItemWithInventory extends ArmorItem
     public int getSelectedSlot(ItemStack stack) {
         BackpackInventory inv = createInventory(stack);
         return inv.currentSlotID;
+    }
+
+    //***       Clientside methods        ***//
+
+    @Environment(EnvType.CLIENT)
+    private Icon dyedIcon;
+    @Environment(EnvType.CLIENT)
+    private Icon secondPassIcon;
+    @Environment(EnvType.CLIENT)
+    private boolean hasSecondPass = false;
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void registerIcons(IconRegister register) {
+        super.registerIcons(register);
+        dyedIcon = register.registerIcon(getIconString() + "_dyed");
+        if (hasSecondPass)
+            secondPassIcon = register.registerIcon(getIconString() + "_overlay");
+    }
+
+    /**
+     * Sends C2S sync packet for item inventory position
+     */
+    @Environment(EnvType.CLIENT)
+    public void sendInventoryPositionPacket(int slotID, int currentSlot) {
+        PlayerControllerMP controller = Minecraft.getMinecraft().playerController;
+        JBPackets.sendInventoryPositionPacket(controller.getNetClientHandler(), slotID, currentSlot);
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public int getColor(ItemStack par1ItemStack) {
+        NBTTagCompound var2 = par1ItemStack.getTagCompound();
+        if (var2 == null) {
+            return 0xFFFFFF;
+        } else {
+            NBTTagCompound var3 = var2.getCompoundTag("display");
+            return var3 == null ? 0xFFFFFF : (var3.hasKey("color") ? var3.getInteger("color") : 0xFFFFFF);
+        }
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public Icon getIconFromDamage(int damage) {
+        return damage == 1 ? dyedIcon : itemIcon;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public Icon getIconFromDamageForRenderPass(int damage, int pass) {
+        return pass == 1 && hasSecondPass ? secondPassIcon : super.getIconFromDamageForRenderPass(damage, pass);
     }
 }

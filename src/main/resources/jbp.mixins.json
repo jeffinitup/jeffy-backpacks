@@ -6,6 +6,7 @@
   "mixins": [
     "container.ContainerMixin",
     "container.slot.SlotArmorMixin",
+    "crafting.BulkCraftingManagerMixin",
     "item.ItemArmorMixin"
   ],
   "client": [
