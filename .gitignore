@@ -24,8 +24,8 @@ bin/
 run/
 
 # btw
-.build_BTW/
-.custom_mappings/
+/build_BTW/
+/custom_mappings/
 
 # macos
 *.DS_Store
