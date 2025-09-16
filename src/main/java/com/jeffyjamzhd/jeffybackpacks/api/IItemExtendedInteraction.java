@@ -1,5 +1,7 @@
 package com.jeffyjamzhd.jeffybackpacks.api;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.World;
@@ -10,18 +12,46 @@ import net.minecraft.src.World;
  */
 public interface IItemExtendedInteraction {
     /**
-     * {@link ItemStack} right-clicked. {@code true} if the interaction is successful
+     * Called before extended interaction hooks on client, usually to
+     * send sync/validation packets to server
      */
-    ItemStack itemRightClicked(ItemStack item, EntityPlayer player, World world);
+    @Environment(EnvType.CLIENT)
+    void beforeExtendedInteraction(ItemStack item, int slotID);
+
+    /**
+     * {@link ItemStack} right-clicked. {@code true} if the interaction is successful
+     * @param holdingShift {@code true} if shift is pressed
+     */
+    ItemStack itemRightClicked(
+            ItemStack stack,
+            EntityPlayer player,
+            World world,
+            boolean holdingShift
+    );
 
     /**
      * {@link ItemStack} right-clicked with an {@link ItemStack} in the cursor slot.
+     * @param holdingShift {@code true} if shift is pressed
      * @return Modified {@code mouseStack}
      */
-    ItemStack itemRightClickedWithStack(ItemStack item, ItemStack mouseStack, EntityPlayer player, World world);
+    ItemStack itemRightClickedWithStack(
+            ItemStack stack,
+            ItemStack cursorStack,
+            EntityPlayer player,
+            World world,
+            boolean holdingShift
+    );
 
     /**
      * {@link ItemStack} hovered over is being scrolled
+     * @param direction Scroll direction
+     * @param holdingShift {@code true} if shift is pressed
      */
-    boolean itemScrolled(ItemStack item, EntityPlayer player, World world, int direction);
+    boolean itemScrolled(
+            ItemStack item,
+            EntityPlayer player,
+            World world,
+            int direction,
+            boolean holdingShift
+    );
 }

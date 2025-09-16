@@ -6,11 +6,10 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 
-import java.util.UUID;
-
 public class BackpackInventory implements IItemStackInventory {
     protected ItemStack[] inventory;
     protected final int size;
+    public int currentSlotID;
 
     public BackpackInventory(ItemStack stack, int inventorySize) {
         // Create tag compound if one doesn't exist
@@ -22,6 +21,7 @@ public class BackpackInventory implements IItemStackInventory {
         NBTTagCompound compound = stack.getTagCompound();
         this.size = inventorySize;
         this.inventory = new ItemStack[this.size];
+        this.currentSlotID = readCurrentSlotFromNBT(compound);
 
         // Read stack NBT
         readFromNBT(compound);
@@ -87,10 +87,11 @@ public class BackpackInventory implements IItemStackInventory {
     /**
      * Gets first {@link ItemStack} in inventory
      */
-    public ItemStack getFirstStack() {
-        for (int i = 0; i < size; i++) {
+    public ItemStack popFirstStack() {
+        for (int i = size - 1; i >= 0; i--) {
             ItemStack stack = getStackInSlot(i);
             if (stack != null) {
+                inventory[i] = null;
                 return stack;
             }
         }
@@ -104,7 +105,7 @@ public class BackpackInventory implements IItemStackInventory {
     public ItemStack putStackAt(ItemStack stack, int slot) {
         ItemStack slotStack = getStackInSlot(slot);
 
-        if (slotStack != null) {
+        if (slotStack != null && slotStack.isItemEqual(stack)) {
             // Attempt merge
             int countInSlot = slotStack.stackSize;
             int maxCount = slotStack.getMaxStackSize();
@@ -112,7 +113,7 @@ public class BackpackInventory implements IItemStackInventory {
 
             setInventorySlotContents(slot, slotStack.setStackSize(slotStack.getStackSize() + diff));
             stack.stackSize -= diff;
-        } else {
+        } else if (slotStack == null) {
             // Put stack in slot, splitting incase
             // the stack is over maximum
             setInventorySlotContents(slot, stack);
@@ -152,6 +153,17 @@ public class BackpackInventory implements IItemStackInventory {
         return stack;
     }
 
+    public int scrollCurrentSlotID(int scroll) {
+        currentSlotID += scroll;
+        if (currentSlotID >= size) {
+            currentSlotID = 0;
+        }
+        if (currentSlotID < 0) {
+            currentSlotID = size - 1;
+        }
+        return currentSlotID;
+    }
+
     public void readFromNBT(NBTTagCompound compound) {
         // Get inventory tag
         NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
@@ -174,7 +186,7 @@ public class BackpackInventory implements IItemStackInventory {
         }
     }
 
-    public void writeToNBT(NBTTagCompound compound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         // Iterate through inventory
         NBTTagList list = new NBTTagList();
         for (int slot = 0; slot < this.inventory.length; slot++) {
@@ -189,44 +201,40 @@ public class BackpackInventory implements IItemStackInventory {
 
         NBTTagCompound backpack = new NBTTagCompound();
         backpack.setTag("ItemStacks", list);
+        backpack.setInteger("CurrentSlotID", currentSlotID);
+        backpack.setInteger("Size", size);
         compound.setTag("BackpackInventory", backpack);
-        compound.setInteger("Size", size);
+        return compound;
     }
 
     /**
      * Gets inventory slot count from provided NBT compound.
      * If there is no tag/data, returns {@code orDefault}
      */
-    private int readSlotCountFromNBT(NBTTagCompound compound, int orDefault) {
+    private int readCurrentSlotFromNBT(NBTTagCompound compound) {
         // Get value from tag
         if (compound != null) {
             NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
             if (content != null) {
-                // It has a set inventory size, nice
-                return content.getInteger("InventorySize");
+                // It has a set slot id, nice
+                return content.getInteger("CurrentSlotID");
             }
         }
-        // No tag or value, return param value
-        return orDefault;
+        // No tag or value, return 0
+        return 0;
     }
 
-    /**
-     * Gets this inventory's UUID (identifier) from provided
-     * NBT compound. If there is no tag/data, returns a freshly
-     * generated UUID
-     */
-    private String readUUIDFromNBT(NBTTagCompound compound) {
-        // Get value from tag
+
+    public NBTTagCompound writeCurrentSlotToNBT(NBTTagCompound compound, int slotID) {
         if (compound != null) {
             NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
             if (content != null) {
-                // It has a set UUID, nice
-                return content.getString("Identifier");
+                content.setInteger("CurrentSlotID", slotID);
             }
         }
-        // No tag or value, make one!
-        return UUID.randomUUID().toString();
+        return compound;
     }
+
 
     //***       Unused interface methods        ***//
 

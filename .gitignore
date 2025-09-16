@@ -23,5 +23,9 @@ bin/
 # fabric
 run/
 
+# btw
+.build_BTW/
+.custom_mappings/
+
 # macos
 *.DS_Store

@@ -1,7 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
 import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
-import com.jeffyjamzhd.jeffybackpacks.api.IItemExtendedInteraction;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,14 +8,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 
 import java.io.*;
-import java.util.ArrayList;
 
 public class JBPackets {
-    public static String PACKET_EXTENDED_SLOT_INTERACTION = "jbp|extendedSlotInteraction";
+    public static String PACKET_UPDATE_SCROLL = "jbp|inventoryPosition";
 
     public static void register(JeffyBackpacks addon) {
         JeffyBackpacks.logInfo("Registering packets...");
-        addon.registerPacketHandler(PACKET_EXTENDED_SLOT_INTERACTION, JBPackets::handleExtendedInteraction);
+        addon.registerPacketHandler(PACKET_UPDATE_SCROLL, JBPackets::handleInventoryPositionPacket);
 
         if (!MinecraftServer.getIsServer())
             registerClientPackets(addon);
@@ -28,80 +26,53 @@ public class JBPackets {
     }
 
     /**
-     * Sends extended interaction packet (Client -> Server)
-     * @param windowID Open container (0 - player inventory)
-     * @param slotID Slot right-clicked on (-999 - no slot)
+     * Sends a C2S packet that updates the scroll value in backpack on the server side
+     * @param slotID Slot backpack is in
+     * @param scrollValue Scroll value in backpack
      */
     @Environment(EnvType.CLIENT)
-    public static void sendExtendedInteraction(int windowID, int slotID, ItemStack cursorStack, NetClientHandler handler) {
-        // Begin forming packet
+    public static void sendInventoryPositionPacket(NetClientHandler handler, int slotID, int scrollValue) {
+        // Setup stream
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         DataOutputStream dataStream = new DataOutputStream(byteStream);
 
+        // Write data
         try {
-            dataStream.writeShort(windowID);
             dataStream.writeShort(slotID);
-            Packet.writeItemStack(cursorStack, dataStream);
+            dataStream.writeShort(scrollValue);
         } catch (IOException e) {
             e.printStackTrace(System.out);
         }
 
+        // Queue it
         byte[] data = byteStream.toByteArray();
-        Packet250CustomPayload packet = new Packet250CustomPayload(PACKET_EXTENDED_SLOT_INTERACTION, data);
+        Packet250CustomPayload packet = new Packet250CustomPayload(PACKET_UPDATE_SCROLL, data);
         handler.addToSendQueue(packet);
     }
 
     /**
-     * Parses extended interaction packet
-     * @param payload Packet
-     * @param player Player
+     * Verifies and sets scroll NBT in provided slotID
+     * @param payload Scroll packet to parse
+     * @param player Player who sent the packet
      */
-    public static void handleExtendedInteraction(Packet250CustomPayload payload, EntityPlayer player) {
+    public static void handleInventoryPositionPacket(Packet250CustomPayload payload, EntityPlayer player) {
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(payload.data));
         try {
             // Parse data
-            int windowID = stream.readShort();
             int slotID = stream.readShort();
-            ItemStack cursorStack = Packet.readItemStack(stream);
+            int scrollValue = stream.readShort();
 
-            if (windowID != player.openContainer.windowId || !player.openContainer.isPlayerNotUsingContainer(player)) {
-                // Container mismatch
-                return;
-            }
-
-            // Get item at slot
-            Slot slotAt = player.openContainer.getSlot(slotID);
-
-            // Holding stack?
-            if (cursorStack != null && slotAt.getHasStack()) {
-                // Do not allow nesting
-                if (cursorStack.getItem() instanceof ItemWithInventory) {
-                    return;
+            // Get slot at ID
+            Slot slot = player.openContainer.getSlot(slotID);
+            if (slot != null && slot.getHasStack()) {
+                // Check item in slot
+                ItemStack stack = slot.getStack();
+                if (stack.getItem() instanceof ItemWithInventory specialItem) {
+                    // Set selected slot
+                    specialItem.setSelectedSlot(stack, scrollValue);
+                    JeffyBackpacks.logInfo("Set slot to {} on server", scrollValue);
                 }
-
-                EntityPlayerMP playerMP = (EntityPlayerMP) player;
-                ItemStack itemStackAt = slotAt.getStack();
-                IItemExtendedInteraction item = (IItemExtendedInteraction) itemStackAt.getItem();
-
-                // Handle transaction
-                short transaction = playerMP.openContainer.getNextTransactionID(playerMP.inventory);
-                playerMP.playerNetServerHandler.sendPacketToPlayer(new Packet106Transaction(windowID, transaction, true));
-
-                // Handle interaction
-                ItemStack result = item.itemRightClickedWithStack(itemStackAt, cursorStack, player, player.getEntityWorld());
-                playerMP.playerInventoryBeingManipulated = true;
-                playerMP.inventory.setItemStack(result.stackSize > 0 ? result : null);
-                playerMP.updateHeldItem();
-                playerMP.openContainer.detectAndSendChanges();
-                playerMP.playerInventoryBeingManipulated = false;
-
-//                // Sync with client
-//                ArrayList<ItemStack> stacks = new ArrayList<>();
-//                for (int i = 0; i < playerMP.openContainer.inventorySlots.size(); ++i)
-//                    stacks.add(((Slot) playerMP.openContainer.inventorySlots.get(i)).getStack());
-//                playerMP.updateCraftingInventory(playerMP.openContainer, stacks);
             }
-
         } catch (IOException e) {
             e.printStackTrace(System.out);
         }

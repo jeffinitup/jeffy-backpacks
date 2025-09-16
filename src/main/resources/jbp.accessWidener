@@ -1,0 +1,5 @@
+accessWidener v1 named
+accessible method net/minecraft/src/GuiContainer getSlotAtPosition (II)Lnet/minecraft/src/Slot;
+accessible class net/minecraft/src/SlotCreativeInventory
+accessible class net/minecraft/src/ContainerCreative
+accessible class net/minecraft/src/SlotArmor

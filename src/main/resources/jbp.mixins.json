@@ -4,15 +4,17 @@
   "package": "com.jeffyjamzhd.jeffybackpacks.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ContainerMixin"
+    "container.ContainerMixin",
+    "container.slot.SlotArmorMixin",
+    "item.ItemArmorMixin"
   ],
   "client": [
-    "GuiContainerMixin"
+    "gui.GuiContainerMixin",
+    "gui.GuiScreenMixin",
+    "render.RenderPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
-  "mixinextras": {
-    "minVersion": "0.5.0"
-  }
+  "plugin": "com.jeffyjamzhd.jeffybackpacks.mixin.MixinConfig"
 }

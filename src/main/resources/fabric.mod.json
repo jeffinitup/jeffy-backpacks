@@ -3,9 +3,9 @@
   "id": "jbp",
   "version": "${version}",
   "name": "Jeffy Backpacks",
-  "description": "Backpack addon for Better Than Wolves",
+  "description": "Jeffy Backpacks; they're better than bundles!",
   "authors": [
-    "jeffyjamzhd!"
+    "jeffyjamzhd"
   ],
   "contact": {
     "homepage": "https://legacyfabric.net/",
@@ -20,13 +20,18 @@
     ]
   },
   "custom": {
-    "btw:addon_prefix": "JBP"
+    "btw:addon_prefix": "JBP",
+    "loom:injected_interfaces": {
+      "net/minecraft/src/GuiScreen": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IGuiScreen"],
+      "net/minecraft/src/ItemArmor": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItemArmor"]
+    }
   },
   "mixins": [
     "jbp.mixins.json"
   ],
+  "accessWidener": "jbp.accessWidener",
   "depends": {
-    "fabricloader": ">=0.14.19",
+    "fabricloader": ">=0.15.6",
     "minecraft": "1.6.4"
   }
 }
