@@ -8,7 +8,6 @@ import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class BackpackInventory implements IItemStackInventory {
     protected final int size;

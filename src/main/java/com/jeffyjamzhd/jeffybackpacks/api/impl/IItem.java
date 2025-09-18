@@ -13,9 +13,10 @@ public interface IItem {
     }
 
     /**
-     * Called when this item is destroyed (dropped item entity is destroyed, burned, etc)
+     * Called when this item is destroyed (dropped item entity is destroyed, burned, etc.)
      * @param stack {@link ItemStack} that was destroyed
      */
+    @SuppressWarnings(value = "unused")
     default void jbp$onItemDestroyed(ItemStack stack, World world, double x, double y, double z) {
     }
 

@@ -178,13 +178,15 @@ public abstract class GuiContainerMixin extends GuiScreen {
     @Unique
     private void jbp$renderTooltipWithStackContents(ItemStack stack, int x, int y) {
         // Declare variables
-        ItemWithInventory invItem = (ItemWithInventory) stack.getItem();
-        BackpackInventory inv = new BackpackInventory(stack, invItem.inventorySize);
-        int invSize = inv.getSizeInventory();
-        int invSelected = inv.currentSlotID;
-        Pair<Integer, Integer> grid = ((ItemWithInventory) stack.getItem()).getInvGridArrangement();
+        @SuppressWarnings(value = "unchecked")
         List<String> tooltipList = stack.getTooltip(mc.thePlayer, false);
 
+        ItemWithInventory invItem = (ItemWithInventory) stack.getItem();
+        BackpackInventory inv = new BackpackInventory(stack, invItem.inventorySize);
+        Pair<Integer, Integer> grid = ((ItemWithInventory) stack.getItem()).getInvGridArrangement();
+
+        int invSize = inv.getSizeInventory();
+        int invSelected = inv.currentSlotID;
         int posX = x + 12;
         int posY = y - 12;
         int width, height;

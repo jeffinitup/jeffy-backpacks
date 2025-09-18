@@ -2,7 +2,6 @@ package com.jeffyjamzhd.jeffybackpacks.item;
 
 import btw.item.items.ArmorItem;
 import btw.item.util.ItemUtils;
-import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.api.IItemExtendedInteraction;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBPackets;
@@ -96,6 +95,7 @@ public class ItemWithInventory extends ArmorItem
     }
 
     @Override
+    @SuppressWarnings(value = "unchecked")
     public void addInformation(ItemStack stack, EntityPlayer player, List stringList, boolean shift) {
         BackpackInventory inv = createInventory(stack);
         int slotCount = inventorySize - inv.getSizeInventory();
@@ -131,7 +131,7 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public void itemRightClicked(ItemStack item, EntityPlayer player,
                                  World world, boolean holdingShift) {
-        JeffyBackpacks.logInfo("Item right clicked on {}!", !world.isRemote ? "server" : "client");
+        // JeffyBackpacks.logInfo("Item right clicked on {}!", !world.isRemote ? "server" : "client");
 
         // Get item from inventory
         BackpackInventory inv = createInventory(item);
@@ -158,7 +158,7 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public ItemStack itemRightClickAsMouseStack(ItemStack item, EntityPlayer player,
                                                 World world, boolean holdingShift) {
-        JeffyBackpacks.logInfo("Item right clicked as mouse stack on {}!", !world.isRemote ? "server" : "client");
+        // JeffyBackpacks.logInfo("Item right clicked as mouse stack on {}!", !world.isRemote ? "server" : "client");
 
         // Get item from inventory
         BackpackInventory inv = createInventory(item);
@@ -182,7 +182,7 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public void itemRightClickedWithStack(ItemStack itemStack, ItemStack mouseStack,
                                           EntityPlayer player, World world, boolean holdingShift) {
-        JeffyBackpacks.logInfo("Item right clicked with stack on {}!", !world.isRemote ? "server" : "client");
+        // JeffyBackpacks.logInfo("Item right clicked with stack on {}!", !world.isRemote ? "server" : "client");
 
         if (isItemValidForInsertion(mouseStack)) {
             // Attempt to merge with inventory
@@ -203,7 +203,7 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public ItemStack itemRightClickedWithStackAsMouseStack(ItemStack slotStack, ItemStack mouseStack,
                                                            EntityPlayer player, World world, boolean holdingShift) {
-        JeffyBackpacks.logInfo("Stack right clicked with item on {}!", !world.isRemote ? "server" : "client");
+        // JeffyBackpacks.logInfo("Stack right clicked with item on {}!", !world.isRemote ? "server" : "client");
 
         if (isItemValidForInsertion(slotStack)) {
             // Attempt to merge with inventory
@@ -223,11 +223,11 @@ public class ItemWithInventory extends ArmorItem
     }
 
     @Override
-    public boolean itemScrolled(ItemStack item, EntityPlayer player,
-                                World world, int direction, boolean holdingShift) {
+    public void itemScrolled(ItemStack item, EntityPlayer player,
+                             World world, int direction, boolean holdingShift) {
         // Don't run: stack has no tag data or is holding shift
         if (!hasProperCompoundTag(item) || holdingShift) {
-            return false;
+            return;
         }
 
         // Set scroll
@@ -237,7 +237,6 @@ public class ItemWithInventory extends ArmorItem
 
         // Play sound
         Minecraft.getMinecraft().sndManager.playSoundFX("random.click", 0.5F, 1.8F + (itemRand.nextFloat() * 0.2F));
-        return true;
     }
 
     //***       Class specific methods        ***//
@@ -260,6 +259,9 @@ public class ItemWithInventory extends ArmorItem
         return this;
     }
 
+    /**
+     * Called when item is inserted
+     */
     public void playInsertSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(
@@ -274,6 +276,9 @@ public class ItemWithInventory extends ArmorItem
         }
     }
 
+    /**
+     * Called when item is extracted
+     */
     public void playExtractSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(
@@ -288,6 +293,9 @@ public class ItemWithInventory extends ArmorItem
         }
     }
 
+    /**
+     * Called when item insertion is attempted, but fails
+     */
     public void playFullSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(

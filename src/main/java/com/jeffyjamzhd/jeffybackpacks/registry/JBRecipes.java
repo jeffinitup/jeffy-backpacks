@@ -31,8 +31,8 @@ public class JBRecipes {
                         "SS",
                         "##",
                         "##",
-                        Character.valueOf('S'), Item.silk,
-                        Character.valueOf('#'), new TagInstance(BTWTags.knitWools, 1)
+                        'S', Item.silk,
+                        '#', new TagInstance(BTWTags.knitWools, 1)
                 });
         RecipeManager.addRecipe(
                 new ItemStack(JBItems.satchel),
@@ -40,8 +40,8 @@ public class JBRecipes {
                         "SSS",
                         "FFF",
                         "FFF",
-                        Character.valueOf('S'), BTWItems.hempFibers,
-                        Character.valueOf('F'), BTWItems.fabric
+                        'S', BTWItems.hempFibers,
+                        'F', BTWItems.fabric
                 });
         RecipeManager.addRecipe(
                 new ItemStack(JBItems.backpack),
@@ -49,16 +49,16 @@ public class JBRecipes {
                         "LLL",
                         "BLB",
                         "LLL",
-                        Character.valueOf('L'), BTWTags.tannedLeathers,
-                        Character.valueOf('B'), BTWItems.belt
+                        'L', BTWTags.tannedLeathers,
+                        'B', BTWItems.belt
                 });
         RecipeManager.addRecipe(
                 new ItemStack(JBItems.lunchbox),
                 new Object[]{
                         "ICI",
                         "III",
-                        Character.valueOf('I'), Item.ingotIron,
-                        Character.valueOf('C'), BTWBlocks.chest
+                        'I', Item.ingotIron,
+                        'C', BTWBlocks.chest
                 }
         );
     }

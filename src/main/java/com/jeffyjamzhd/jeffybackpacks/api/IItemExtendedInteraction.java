@@ -69,10 +69,11 @@ public interface IItemExtendedInteraction {
 
     /**
      * {@link ItemStack} hovered over is being scrolled
-     * @param direction Scroll direction
+     *
+     * @param direction    Scroll direction
      * @param holdingShift {@code true} if shift is pressed
      */
-    boolean itemScrolled(
+    void itemScrolled(
             ItemStack item,
             EntityPlayer player,
             World world,

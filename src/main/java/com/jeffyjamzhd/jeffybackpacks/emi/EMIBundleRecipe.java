@@ -1,14 +1,12 @@
 package com.jeffyjamzhd.jeffybackpacks.emi;
 
 import btw.item.BTWItems;
-import btw.item.items.ArmorItemWool;
 import com.google.common.collect.Lists;
 import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeBundle;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import emi.dev.emi.emi.EmiUtil;
 import emi.dev.emi.emi.api.recipe.EmiCraftingRecipe;
 import emi.dev.emi.emi.api.render.EmiTexture;
-import emi.dev.emi.emi.api.stack.EmiIngredient;
 import emi.dev.emi.emi.api.stack.EmiStack;
 import emi.dev.emi.emi.api.widget.GeneratedSlotWidget;
 import emi.dev.emi.emi.api.widget.SlotWidget;

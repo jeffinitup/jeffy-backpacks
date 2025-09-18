@@ -3,7 +3,6 @@ package com.jeffyjamzhd.jeffybackpacks.item;
 import btw.item.items.FoodItem;
 import btw.util.sounds.BTWSoundManager;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
-import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;
 import emi.shims.java.com.unascribed.retroemi.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

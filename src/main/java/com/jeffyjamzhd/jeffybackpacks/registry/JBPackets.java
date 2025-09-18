@@ -4,7 +4,6 @@ import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 
 import java.io.*;
@@ -15,14 +14,6 @@ public class JBPackets {
     public static void register(JeffyBackpacks addon) {
         JeffyBackpacks.logInfo("Registering packets...");
         addon.registerPacketHandler(PACKET_UPDATE_SCROLL, JBPackets::handleInventoryPositionPacket);
-
-        if (!MinecraftServer.getIsServer())
-            registerClientPackets(addon);
-    }
-
-    @Environment(EnvType.CLIENT)
-    public static void registerClientPackets(JeffyBackpacks addon) {
-        JeffyBackpacks.logInfo("Registering client packets...");
     }
 
     /**
