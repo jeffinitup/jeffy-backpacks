@@ -5,8 +5,14 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "container.ContainerMixin",
+    "container.PlayerContainerMixin",
     "container.slot.SlotArmorMixin",
     "crafting.BulkCraftingManagerMixin",
+    "emi.ButtonWidgetMixin",
+    "emi.EmiInfoRecipeMixin",
+    "entity.EntityItemMixin",
+    "entity.EntityPlayerMixin",
+    "item.ItemMixin",
     "item.ItemArmorMixin"
   ],
   "client": [

@@ -13,6 +13,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 
+import java.util.List;
+
 /**
  * An item that contains a certain amount of {@link ItemStack}.
  */
@@ -26,6 +28,10 @@ public class ItemWithInventory extends ArmorItem
      * Arrangement of the rendering grid
      */
     private final Pair<Integer, Integer> gridArrangement;
+    /**
+     * If this item has a second render pass
+     */
+    private boolean hasSecondPass = false;
 
     /**
      * Constructor for {@code ItemWithInventory}
@@ -41,6 +47,25 @@ public class ItemWithInventory extends ArmorItem
 
         this.setMaxDamage(0);
         this.setMaxStackSize(1);
+    }
+
+    @Override
+    public void jbp$onItemDestroyed(ItemStack stack, World world, double x, double y, double z) {
+        if (!world.isRemote) {
+            // Create inventory
+            BackpackInventory inv = createInventory(stack);
+
+            // Iterate and spill contents into world
+            for (int slot = 0; slot < inv.getSizeInventory(); slot++) {
+                // Get stack
+                ItemStack stackInSlot = inv.getStackInSlot(slot);
+                if (stackInSlot == null)
+                    continue;
+
+                // Create entity
+                ItemUtils.ejectStackWithRandomVelocity(world, x, y, z, stackInSlot);
+            }
+        }
     }
 
     /**
@@ -64,77 +89,142 @@ public class ItemWithInventory extends ArmorItem
         stack.setItemDamage(1);
     }
 
+    @Override
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
+        // Null out armor stuff if necessary
+        return jbp$canBeWorn() ? super.onItemRightClick(stack, world, player) : stack;
+    }
+
+    @Override
+    public void addInformation(ItemStack stack, EntityPlayer player, List stringList, boolean shift) {
+        BackpackInventory inv = createInventory(stack);
+        int slotCount = inventorySize - inv.getSizeInventory();
+
+        super.addInformation(stack, player, stringList, shift);
+        if (hasProperCompoundTag(stack)) {
+            if (slotCount > 1) {
+                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
+                        "%s slots available".formatted(slotCount) + EnumChatFormatting.RESET);
+            } else if (slotCount == 1) {
+                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
+                        "1 slot available" + EnumChatFormatting.RESET);
+            } else {
+                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
+                        "Full" + EnumChatFormatting.RESET);
+            }
+        }
+
+    }
+
     //***       IItemExtendedInteraction        ***//
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void beforeExtendedInteraction(ItemStack item, int slotID) {
+    public void beforeExtendedInteraction(ItemStack item, int slotID, boolean holdingShift) {
+        if (holdingShift) {
+            return;
+        }
         int selectedSlot = getSelectedSlot(item);
         sendInventoryPositionPacket(slotID, selectedSlot);
     }
 
     @Override
-    public ItemStack itemRightClicked(ItemStack item, EntityPlayer player, World world, boolean holdingShift) {
+    public void itemRightClicked(ItemStack item, EntityPlayer player,
+                                 World world, boolean holdingShift) {
         JeffyBackpacks.logInfo("Item right clicked on {}!", !world.isRemote ? "server" : "client");
 
         // Get item from inventory
         BackpackInventory inv = createInventory(item);
         ItemStack invStack = null;
 
-        if (!holdingShift) {
+        if (!holdingShift && !inv.inventory.isEmpty()) {
             invStack = inv.getStackInSlot(inv.currentSlotID);
             inv.setInventorySlotContents(inv.currentSlotID, null);
         } else {
             ItemStack first = inv.popFirstStack();
-            ItemUtils.givePlayerStackOrEject(player, first);
+            if (first != null) {
+                ItemUtils.givePlayerStackOrEject(player, first);
+            }
         }
 
         item.stackTagCompound = inv.writeToNBT(item.stackTagCompound);
-
         player.inventory.setItemStack(invStack);
 
-        if (!world.isRemote) {
-            if (invStack != null) {
-                world.playSoundEffect(
-                        player.posX, player.posY, player.posZ, JBSounds.BACKPACK_EXTRACT.sound(),
-                        0.5f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
-            }
+        if (invStack != null) {
+            playExtractSFX(world, player);
+        }
+    }
+
+    @Override
+    public ItemStack itemRightClickAsMouseStack(ItemStack item, EntityPlayer player,
+                                                World world, boolean holdingShift) {
+        JeffyBackpacks.logInfo("Item right clicked as mouse stack on {}!", !world.isRemote ? "server" : "client");
+
+        // Get item from inventory
+        BackpackInventory inv = createInventory(item);
+        ItemStack invStack;
+
+        if (!holdingShift && !inv.inventory.isEmpty()) {
+            invStack = inv.getStackInSlot(inv.currentSlotID);
+            inv.setInventorySlotContents(inv.currentSlotID, null);
+        } else {
+            invStack = inv.popFirstStack();
+        }
+        item.stackTagCompound = inv.writeToNBT(item.stackTagCompound);
+
+        if (invStack != null) {
+            playExtractSFX(world, player);
         }
 
         return invStack;
     }
 
     @Override
-    public ItemStack itemRightClickedWithStack(ItemStack item, ItemStack mouseStack, EntityPlayer player, World world, boolean holdingShift) {
+    public void itemRightClickedWithStack(ItemStack itemStack, ItemStack mouseStack,
+                                          EntityPlayer player, World world, boolean holdingShift) {
         JeffyBackpacks.logInfo("Item right clicked with stack on {}!", !world.isRemote ? "server" : "client");
 
-        // Attempt to merge with inventory
-        BackpackInventory inv = createInventory(item);
-        ItemStack result = holdingShift ? inv.putStackSmart(mouseStack) : inv.putStackAt(mouseStack, inv.currentSlotID);
-        item.stackTagCompound = inv.writeToNBT(item.stackTagCompound);
+        if (isItemValidForInsertion(mouseStack)) {
+            // Attempt to merge with inventory
+            BackpackInventory inv = createInventory(itemStack);
+            ItemStack result = inv.putStackSmart(mouseStack);
+            itemStack.stackTagCompound = inv.writeToNBT(itemStack.stackTagCompound);
 
-        if (!world.isRemote) {
             if (result == null || !mouseStack.isItemEqual(result)) {
-                // Play sound
-                world.playSoundEffect(
-                        player.posX, player.posY, player.posZ, JBSounds.BACKPACK_INSERT.sound(),
-                        0.5f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
-            } else if (mouseStack.isItemEqual(result)) {
-                // Play "full" sound
-                world.playSoundEffect(
-                        player.posX, player.posY, player.posZ, JBSounds.BACKPACK_FULL.sound(),
-                        0.5f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+                playInsertSFX(world, player);
+            } else {
+                playFullSFX(world, player);
             }
 
-
+            player.inventory.setItemStack(result);
         }
-
-        player.inventory.setItemStack(result);
-        return result;
     }
 
     @Override
-    public boolean itemScrolled(ItemStack item, EntityPlayer player, World world, int direction, boolean holdingShift) {
+    public ItemStack itemRightClickedWithStackAsMouseStack(ItemStack slotStack, ItemStack mouseStack,
+                                                           EntityPlayer player, World world, boolean holdingShift) {
+        JeffyBackpacks.logInfo("Stack right clicked with item on {}!", !world.isRemote ? "server" : "client");
+
+        if (isItemValidForInsertion(slotStack)) {
+            // Attempt to merge with inventory
+            BackpackInventory inv = createInventory(mouseStack);
+            ItemStack result = inv.putStackSmart(slotStack);
+            mouseStack.stackTagCompound = inv.writeToNBT(mouseStack.stackTagCompound);
+
+            if (result == null || !slotStack.isItemEqual(result)) {
+                playInsertSFX(world, player);
+            } else {
+                playFullSFX(world, player);
+            }
+
+            return result;
+        }
+        return slotStack;
+    }
+
+    @Override
+    public boolean itemScrolled(ItemStack item, EntityPlayer player,
+                                World world, int direction, boolean holdingShift) {
         // Don't run: stack has no tag data or is holding shift
         if (!hasProperCompoundTag(item) || holdingShift) {
             return false;
@@ -146,11 +236,19 @@ public class ItemWithInventory extends ArmorItem
         setSelectedSlot(inv, item, newScroll);
 
         // Play sound
-        Minecraft.getMinecraft().sndManager.playSoundFX("random.click", 0.6F, 1.5F);
+        Minecraft.getMinecraft().sndManager.playSoundFX("random.click", 0.5F, 1.8F + (itemRand.nextFloat() * 0.2F));
         return true;
     }
 
     //***       Class specific methods        ***//
+
+    /**
+     * {@code true} if provided {@link ItemStack} is able to
+     * be inserted into this item
+     */
+    public boolean isItemValidForInsertion(ItemStack stack) {
+        return true;
+    }
 
     /**
      * Sets second render pass mode in this {@code ItemWithInventory}.
@@ -162,6 +260,48 @@ public class ItemWithInventory extends ArmorItem
         return this;
     }
 
+    public void playInsertSFX(World world, EntityPlayer player) {
+        if (world.isRemote) {
+            world.playSound(
+                    player.posX, player.posY, player.posZ, JBSounds.BACKPACK_INSERT.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+
+        if (!world.isRemote) {
+            world.playSoundToNearExcept(
+                    player, JBSounds.BACKPACK_INSERT.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+    }
+
+    public void playExtractSFX(World world, EntityPlayer player) {
+        if (world.isRemote) {
+            world.playSound(
+                    player.posX, player.posY, player.posZ, JBSounds.BACKPACK_EXTRACT.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+
+        if (!world.isRemote) {
+            world.playSoundToNearExcept(
+                    player, JBSounds.BACKPACK_EXTRACT.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+    }
+
+    public void playFullSFX(World world, EntityPlayer player) {
+        if (world.isRemote) {
+            world.playSound(
+                    player.posX, player.posY, player.posZ, JBSounds.BACKPACK_FULL.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+
+        if (!world.isRemote) {
+            world.playSoundToNearExcept(
+                    player, JBSounds.BACKPACK_FULL.sound(),
+                    0.9f + world.rand.nextFloat() * 0.1f, 1.0f + world.rand.nextFloat() * 0.25f);
+        }
+    }
+
     /**
      * {@code true} if the provided stack has an inventory.
      */
@@ -171,8 +311,7 @@ public class ItemWithInventory extends ArmorItem
         }
         NBTTagCompound tag = stack.getTagCompound();
         if (tag != null) {
-            NBTTagCompound inv = tag.getCompoundTag("BackpackInventory");
-            return inv != null;
+            return tag.hasKey("BackpackInventory");
         }
         return false;
     }
@@ -213,8 +352,6 @@ public class ItemWithInventory extends ArmorItem
     private Icon dyedIcon;
     @Environment(EnvType.CLIENT)
     private Icon secondPassIcon;
-    @Environment(EnvType.CLIENT)
-    private boolean hasSecondPass = false;
 
     @Override
     @Environment(EnvType.CLIENT)

@@ -62,15 +62,25 @@ public class JBPackets {
             int slotID = stream.readShort();
             int scrollValue = stream.readShort();
 
-            // Get slot at ID
+            // Check for cursor stack first!!
+            if (slotID == -999 && player.inventory.getItemStack() != null) {
+                ItemStack cursorStack = player.inventory.getItemStack();
+                if (cursorStack.getItem() instanceof ItemWithInventory invItem) {
+                    invItem.setSelectedSlot(cursorStack, scrollValue);
+                    JeffyBackpacks.logInfo("Set cursor selected slot to {} on server", scrollValue);
+                }
+                return;
+            }
+
+            // Okay, now check for slot
             Slot slot = player.openContainer.getSlot(slotID);
             if (slot != null && slot.getHasStack()) {
                 // Check item in slot
                 ItemStack stack = slot.getStack();
-                if (stack.getItem() instanceof ItemWithInventory specialItem) {
+                if (stack.getItem() instanceof ItemWithInventory invItem) {
                     // Set selected slot
-                    specialItem.setSelectedSlot(stack, scrollValue);
-                    JeffyBackpacks.logInfo("Set slot to {} on server", scrollValue);
+                    invItem.setSelectedSlot(stack, scrollValue);
+                    JeffyBackpacks.logInfo("Set item selected slot to {} on server", scrollValue);
                 }
             }
         } catch (IOException e) {

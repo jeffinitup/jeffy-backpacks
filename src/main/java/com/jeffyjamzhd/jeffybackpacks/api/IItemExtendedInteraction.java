@@ -16,13 +16,13 @@ public interface IItemExtendedInteraction {
      * send sync/validation packets to server
      */
     @Environment(EnvType.CLIENT)
-    void beforeExtendedInteraction(ItemStack item, int slotID);
+    void beforeExtendedInteraction(ItemStack item, int slotID, boolean holdingShift);
 
     /**
-     * {@link ItemStack} right-clicked. {@code true} if the interaction is successful
+     * This item right-clicked.
      * @param holdingShift {@code true} if shift is pressed
      */
-    ItemStack itemRightClicked(
+    void itemRightClicked(
             ItemStack stack,
             EntityPlayer player,
             World world,
@@ -30,11 +30,36 @@ public interface IItemExtendedInteraction {
     );
 
     /**
-     * {@link ItemStack} right-clicked with an {@link ItemStack} in the cursor slot.
+     * This item right-clicked while grabbed by mouse.
+     * Assumes there is no stack present at slot.
      * @param holdingShift {@code true} if shift is pressed
-     * @return Modified {@code mouseStack}
+     * @return Stack generated from this action (if applicable)
      */
-    ItemStack itemRightClickedWithStack(
+    ItemStack itemRightClickAsMouseStack(
+            ItemStack stack,
+            EntityPlayer player,
+            World world,
+            boolean holdingShift
+    );
+
+    /**
+     * This item right-clicked with an {@link ItemStack} in the cursor slot.
+     * @param holdingShift {@code true} if shift is pressed
+     */
+    void itemRightClickedWithStack(
+            ItemStack stack,
+            ItemStack cursorStack,
+            EntityPlayer player,
+            World world,
+            boolean holdingShift
+    );
+
+    /**
+     * {@link ItemStack} right-clicked with this item in the cursor slot.
+     * @param holdingShift {@code true} if shift is pressed
+     * @return Modified {@code stack}
+     */
+    ItemStack itemRightClickedWithStackAsMouseStack(
             ItemStack stack,
             ItemStack cursorStack,
             EntityPlayer player,

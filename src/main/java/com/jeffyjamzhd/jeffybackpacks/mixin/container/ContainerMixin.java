@@ -25,7 +25,7 @@ public class ContainerMixin {
                 if (player.worldObj.isRemote) {
                     // Call pre interaction hook, if not in creative inventory
                     if (!(player.openContainer instanceof ContainerCreative)) {
-                        ext.beforeExtendedInteraction(stackAt, slotID);
+                        ext.beforeExtendedInteraction(stackAt, slotID, action == 1);
                     }
                 }
 
@@ -35,12 +35,46 @@ public class ContainerMixin {
                         return;
                     }
 
-                    ext.itemRightClickedWithStack(stackAt, cursorStack, player, player.getEntityWorld(), action == 1);
+                    // Extended interaction item right-clicked with stack
+                    ext.itemRightClickedWithStack(stackAt, cursorStack,
+                            player, player.getEntityWorld(), action == 1);
                 } else {
-                    ext.itemRightClicked(stackAt, player, player.getEntityWorld(), action == 1);
+                    // Extended interaction item right-clicked
+                    ext.itemRightClicked(stackAt, player,
+                            player.getEntityWorld(), action == 1);
                 }
 
                 cir.setReturnValue(stackAt);
+            }
+
+            // Do right-click with cursor stack if applicable
+            if (cursorStack != null &&
+                    cursorStack.getItem() instanceof IItemExtendedInteraction ext) {
+                // Special client stuff
+                if (player.worldObj.isRemote) {
+                    // Call pre interaction hook, if not in creative inventory
+                    if (!(player.openContainer instanceof ContainerCreative)) {
+                        ext.beforeExtendedInteraction(cursorStack, -999, action == 1);
+                    }
+                }
+
+                // Do not allow nesting
+                if (stackAt != null && stackAt.getItem() instanceof ItemWithInventory) {
+                    return;
+                }
+
+                // Stack right-clicked with extended interaction item
+                ItemStack result;
+                if (stackAt != null) {
+                    result = ext.itemRightClickedWithStackAsMouseStack(stackAt, cursorStack, player,
+                            player.getEntityWorld(), action == 1);
+                } else {
+                    result = ext.itemRightClickAsMouseStack(cursorStack, player,
+                            player.getEntityWorld(), action == 1);
+                }
+                slotAt.putStack(result);
+
+                cir.setReturnValue(cursorStack);
             }
         }
     }

@@ -1,10 +1,7 @@
 package com.jeffyjamzhd.jeffybackpacks;
 
 import btw.BTWAddon;
-import com.jeffyjamzhd.jeffybackpacks.registry.JBItems;
-import com.jeffyjamzhd.jeffybackpacks.registry.JBPackets;
-import com.jeffyjamzhd.jeffybackpacks.registry.JBRecipes;
-import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;
+import com.jeffyjamzhd.jeffybackpacks.registry.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,7 +28,9 @@ public class JeffyBackpacks extends BTWAddon {
 
         JBPackets.register(this);
         JBItems.register();
+        JBTags.register();
         JBRecipes.register();
+        JBAchievements.register();
         JBSounds.register();
 
         logInfo("{} initialized!", this.getName());

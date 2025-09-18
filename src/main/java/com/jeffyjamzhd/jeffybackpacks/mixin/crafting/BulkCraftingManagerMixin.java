@@ -49,7 +49,7 @@ public class BulkCraftingManagerMixin {
 
             // Get inventory contents and merge with recipe output
             BackpackInventory stackInv = new BackpackInventory(stack, itemWInv.inventorySize);
-            List<ItemStack> stackInvContents = Arrays.stream(stackInv.inventory)
+            List<ItemStack> stackInvContents = stackInv.inventory.stream()
                     .filter(Objects::nonNull).toList();
             List<ItemStack> recipeOutput = new ArrayList<>(List.copyOf(recipe.getCraftingOutputList()));
             recipeOutput.addAll(stackInvContents);

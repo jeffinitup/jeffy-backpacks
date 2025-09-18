@@ -1,3 +1,23 @@
 item.bundle.name=Bundle
 item.satchel.name=Satchel
 item.backpack.name=Backpack
+item.lunchbox.name=Lunchbox
+
+tag.jbp.backpacks=Backpacks
+tag.jbp.inventory_items=Items with an Inventory
+
+jbp.inventory_items.info.1=These are items that have an inventory. Depending on how many of these items are on your person, and how full each of them are, you will begin to feel more encumbered.
+jbp.inventory_items.info.2=Scrolling the mouse wheel sets the current highlighted slot. Right clicking on the item will pull the selected item out. Right clicking on the item with another item will put it inside of the item's inventory. Shift right clicking on the item will put the last item in your inventory. Holding the inventory item with your cursor and dragging will either insert or eject items depending on if shift is held.
+jbp.backpacks.info=Backpacks can be worn on your back to lessen it's weight penalties. Worn backpacks also automatically pick up items if your inventory is full.
+jbp.lunchbox.info=Lunchboxes only allow food items to be stored within. When right clicking with a lunchbox in your hand, you'll consume the last food item you put in there.
+jbp.bundle.info=Bundles, unlike conventional backpacks, cannot be worn. Bundles can function as a block palette, where right clicking a block will place a random block stored within bundle's inventory.
+
+achievementtab.jeffy_backpacks=Jeffy Backpacks
+achievement.jbp.craft_bundle=My Bundle of Joy
+achievement.jbp.craft_bundle.desc=Craft a bundle using wool knit and string
+achievement.jbp.craft_lunchbox=Ready for Launch
+achievement.jbp.craft_lunchbox.desc=Craft a lunchbox using iron ingots and a chest
+achievement.jbp.craft_satchel=Not A Purse
+achievement.jbp.craft_satchel.desc=Craft a satchel using fabric and hemp fibers
+achievement.jbp.craft_backpack=Adventure Time!
+achievement.jbp.craft_backpack.desc=Craft a backpack using tanned leather and belts

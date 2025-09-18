@@ -1,14 +1,18 @@
 package com.jeffyjamzhd.jeffybackpacks.inventory;
 
+import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.api.IItemStackInventory;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.NBTTagList;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 public class BackpackInventory implements IItemStackInventory {
     protected final int size;
-    public ItemStack[] inventory;
+    public ArrayList<ItemStack> inventory;
     public int currentSlotID;
 
     public BackpackInventory(ItemStack stack, int inventorySize) {
@@ -20,16 +24,16 @@ public class BackpackInventory implements IItemStackInventory {
         // Prepare inventory
         NBTTagCompound compound = stack.getTagCompound();
         this.size = inventorySize;
-        this.inventory = new ItemStack[this.size];
-        this.currentSlotID = readCurrentSlotFromNBT(compound);
+        this.inventory = new ArrayList<>();
 
         // Read stack NBT
         readFromNBT(compound);
+        this.currentSlotID = readCurrentSlotFromNBT(compound);
     }
 
     @Override
     public void onInventoryChanged() {
-        for (int index = 0; index < this.size; index++) {
+        for (int index = 0; index < inventory.size(); index++) {
             ItemStack at = getStackInSlot(index);
             if (at != null && at.stackSize == 0) {
                 setInventorySlotContents(index, null);
@@ -40,21 +44,23 @@ public class BackpackInventory implements IItemStackInventory {
     @Override
     public ItemStack decrStackSize(int index, int count) {
         // Don't do anything if there's no stack
-        if (inventory[index] == null) {
+        if (index >= inventory.size()) {
+            return null;
+        } else if (inventory.get(index) == null) {
             return null;
         }
 
         // Prepare for split
-        ItemStack at = inventory[index];
+        ItemStack at = inventory.get(index);
         ItemStack split;
 
         // Split if count is below stack size, otherwise
         // null out stack in inventory and return it
-        if (inventory[index].stackSize > count) {
+        if (inventory.get(index).stackSize > count) {
             split = at.splitStack(count);
         } else {
             split = at;
-            inventory[index] = null;
+            inventory.set(index, null);
         }
         return split;
     }
@@ -68,33 +74,48 @@ public class BackpackInventory implements IItemStackInventory {
 
     @Override
     public void setInventorySlotContents(int index, ItemStack stack) {
-        if (0 <= index && index < this.size)
-            inventory[index] = stack;
+        if (0 <= index && index < inventory.size())
+            inventory.set(index, stack);
     }
 
     @Override
     public int getSizeInventory() {
-        return size;
+        return Math.min(inventory.size(), size);
     }
 
     @Override
     public ItemStack getStackInSlot(int index) {
-        return inventory[index];
+        if (inventory.isEmpty() || index < 0 || index >= inventory.size()) {
+            return null;
+        }
+        return inventory.get(index);
     }
 
     //***       Class specific methods        ***//
 
     /**
-     * Gets first {@link ItemStack} in inventory
+     * Gets first {@link ItemStack} in inventory, while also
+     * removing it from this inventory
      */
     public ItemStack popFirstStack() {
-        for (int i = size - 1; i >= 0; i--) {
-            ItemStack stack = getStackInSlot(i);
-            if (stack != null) {
-                inventory[i] = null;
-                return stack;
-            }
+        if (!inventory.isEmpty()) {
+            ItemStack stack = getFirstStack();
+            inventory.remove(inventory.size() - 1);
+            currentSlotID = inventory.size() - 1;
+            return stack;
         }
+        return null;
+    }
+
+    public ItemStack getFirstStack() {
+        if (!inventory.isEmpty()) {
+            return inventory.get(inventory.size() - 1);
+        }
+        return null;
+    }
+
+    public ItemStack putStack(ItemStack stack) {
+        inventory.add(stack);
         return null;
     }
 
@@ -130,23 +151,32 @@ public class BackpackInventory implements IItemStackInventory {
     public ItemStack putStackSmart(ItemStack stack) {
         // Iterate inventory and look for an open slot
         // or matching stack
-        for (int slot = 0; slot < this.size; slot++) {
-            ItemStack slotStack = getStackInSlot(slot);
+        for (int slot = 0; slot <= this.inventory.size(); slot++) {
+            // Try to merge with existing stacks
+            if (slot < this.inventory.size()) {
+                ItemStack slotStack = getStackInSlot(slot);
 
-            // Attempt to put stack in slot
-            if (slotStack == null) {
-                stack = putStackAt(stack, slot);
-            } else if (slotStack.itemID == stack.itemID) {
-                stack = putStackAt(stack, slot);
+                // Attempt to put stack in slot
+                if (slotStack == null) {
+                    stack = putStackAt(stack, slot);
+                } else if (slotStack.itemID == stack.itemID) {
+                    stack = putStackAt(stack, slot);
+                }
+
+                // No stack, return null
+                if (stack == null)
+                    return null;
+
+                // Stack size under 0, return null
+                if (stack.stackSize <= 0)
+                    return null;
             }
 
-            // No stack, return null
-            if (stack == null)
-                return null;
-
-            // Stack size under 0, return null
-            if (stack.stackSize <= 0)
-                return null;
+            // Check for open slot
+            if (slot == this.inventory.size() && this.inventory.size() < this.size) {
+                // Attempt to put stack in slot
+                stack = putStack(stack);
+            }
         }
 
         // Not enough room, so return remainder
@@ -155,11 +185,11 @@ public class BackpackInventory implements IItemStackInventory {
 
     public int scrollCurrentSlotID(int scroll) {
         currentSlotID += scroll;
-        if (currentSlotID >= size) {
+        if (currentSlotID >= inventory.size()) {
             currentSlotID = 0;
         }
         if (currentSlotID < 0) {
-            currentSlotID = size - 1;
+            currentSlotID = inventory.isEmpty() ? 0 : inventory.size() - 1;
         }
         return currentSlotID;
     }
@@ -172,16 +202,16 @@ public class BackpackInventory implements IItemStackInventory {
 
         // Begin parsing item list
         NBTTagList list = content.getTagList("ItemStacks");
-        for (int i = 0; i < list.tagCount() && i < inventory.length; i++) {
+        for (int i = 0; i < list.tagCount() && i < size; i++) {
             // Get ItemStack entry
             NBTTagCompound entry = (NBTTagCompound) list.tagAt(i);
             int slot = entry.getInteger("Slot");
 
             // Attempt to parse ItemStack data
             try {
-                inventory[slot] = ItemStack.loadItemStackFromNBT(entry);
-            } catch (NullPointerException npe) {
-                inventory[slot] = null;
+                inventory.add(ItemStack.loadItemStackFromNBT(entry));
+            } catch (NullPointerException _npe) {
+                JeffyBackpacks.logInfo("Malformed item NBT data in backpack!! T_T");
             }
         }
     }
@@ -189,13 +219,14 @@ public class BackpackInventory implements IItemStackInventory {
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         // Iterate through inventory
         NBTTagList list = new NBTTagList();
-        for (int slot = 0; slot < this.inventory.length; slot++) {
-            if (this.inventory[slot] != null && this.inventory[slot].stackSize > 0) {
+        for (int slot = 0; slot < this.inventory.size(); slot++) {
+            ItemStack stack = this.inventory.get(slot);
+            if (stack != null && stack.stackSize > 0) {
                 // Write item data to NBT
                 NBTTagCompound slotTag = new NBTTagCompound();
                 list.appendTag(slotTag);
                 slotTag.setInteger("Slot", slot);
-                this.inventory[slot].writeToNBT(slotTag);
+                stack.writeToNBT(slotTag);
             }
         }
 
@@ -217,7 +248,12 @@ public class BackpackInventory implements IItemStackInventory {
             NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
             if (content != null) {
                 // It has a set slot id, nice
-                return content.getInteger("CurrentSlotID");
+                int slotID = content.getInteger("CurrentSlotID");
+                if (inventory.isEmpty())
+                    return 0;
+                if (slotID >= inventory.size())
+                    return inventory.size() - 1;
+                return slotID;
             }
         }
         // No tag or value, return 0

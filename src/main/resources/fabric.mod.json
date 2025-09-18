@@ -8,7 +8,7 @@
     "jeffyjamzhd"
   ],
   "contact": {
-    "sources": "https://github.com/jeffinitup/jeffy-backpacks"
+    "homepage": "https://github.com/jeffinitup/jeffy-backpacks"
   },
   "license": "MIT",
   "icon": "assets/jbp/icon.png",
@@ -16,13 +16,17 @@
   "entrypoints": {
     "btw:addon": [
       "com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks"
+    ],
+    "emi": [
+      "com.jeffyjamzhd.jeffybackpacks.emi.JeffyBackpacksEMI"
     ]
   },
   "custom": {
     "btw:addon_prefix": "JBP",
     "loom:injected_interfaces": {
       "net/minecraft/src/GuiScreen": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IGuiScreen"],
-      "net/minecraft/src/ItemArmor": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItemArmor"]
+      "net/minecraft/src/ItemArmor": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItemArmor"],
+      "net/minecraft/src/Item": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItem"]
     }
   },
   "mixins": [

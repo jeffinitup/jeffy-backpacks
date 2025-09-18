@@ -3,3 +3,4 @@ accessible method net/minecraft/src/GuiContainer getSlotAtPosition (II)Lnet/mine
 accessible class net/minecraft/src/SlotCreativeInventory
 accessible class net/minecraft/src/ContainerCreative
 accessible class net/minecraft/src/SlotArmor
+accessible class emi/dev/emi/emi/api/recipe/EmiInfoRecipe$PageManager

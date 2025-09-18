@@ -1,13 +1,19 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
+import btw.block.BTWBlocks;
 import btw.crafting.recipe.RecipeManager;
 import btw.item.BTWItems;
 import btw.item.tag.BTWTags;
+import btw.item.tag.TagInstance;
 import btw.item.tag.TagOrStack;
+import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeBundle;
 import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.ShapedRecipes;
 
 public class JBRecipes {
+    public static ShapedRecipes bundleRecipe;
+
     /**
      * Registers addon recipes
      */
@@ -18,14 +24,15 @@ public class JBRecipes {
 
     private static void registerCrafts() {
         // Add crafting recipes
-        RecipeManager.addRecipe(
+        bundleRecipe = RecipeManager.addShapedRecipeWithCustomClass(
+                RecipeBundle.class,
                 new ItemStack(JBItems.bundle),
                 new Object[]{
                         "SS",
                         "##",
                         "##",
                         Character.valueOf('S'), Item.silk,
-                        Character.valueOf('#'), BTWTags.knitWools
+                        Character.valueOf('#'), new TagInstance(BTWTags.knitWools, 1)
                 });
         RecipeManager.addRecipe(
                 new ItemStack(JBItems.satchel),
@@ -45,6 +52,15 @@ public class JBRecipes {
                         Character.valueOf('L'), BTWTags.tannedLeathers,
                         Character.valueOf('B'), BTWItems.belt
                 });
+        RecipeManager.addRecipe(
+                new ItemStack(JBItems.lunchbox),
+                new Object[]{
+                        "ICI",
+                        "III",
+                        Character.valueOf('I'), Item.ingotIron,
+                        Character.valueOf('C'), BTWBlocks.chest
+                }
+        );
     }
 
     private static void registerStokedCauldron() {
@@ -52,6 +68,11 @@ public class JBRecipes {
                 new ItemStack(BTWItems.glue, 4),
                 new TagOrStack[]{
                         new ItemStack(JBItems.backpack)
+                });
+        RecipeManager.addStokedCrucibleRecipe(
+                new ItemStack(BTWItems.ironNugget, 30),
+                new TagOrStack[]{
+                        new ItemStack(JBItems.lunchbox)
                 });
     }
 }

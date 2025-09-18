@@ -1,6 +1,5 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.gui;
 
-import com.jeffyjamzhd.jeffybackpacks.api.IItemExtendedInteraction;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -8,8 +7,8 @@ import emi.shims.java.com.unascribed.retroemi.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -17,35 +16,112 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashMap;
+import java.util.List;
+
 @Mixin(GuiContainer.class)
 @Environment(EnvType.CLIENT)
 public abstract class GuiContainerMixin extends GuiScreen {
-    @Shadow protected static RenderItem itemRenderer;
+    /**
+     * EMI widget texture for backpack tooltip rendering
+     */
+    @Unique private static final ResourceLocation WIDGET_TEXURE =
+            new ResourceLocation("emi:textures/gui/widgets.png");
 
-    @Shadow protected boolean field_94076_q;
+    @Unique private static final int INTERACTION_INSERT = 0;
+    @Unique private static final int INTERACTION_EXTRACT = 1;
+
+    /**
+     * Array of modified slots, to prevent unnecessary method calls
+     * when dragging backpacks. Key is slot, value is if it should be rendered
+     */
+    @Unique private final HashMap<Slot, Boolean> modifiedSlots = new HashMap<>();
+
+    @Unique private int interactionType = -1;
+
     @Shadow private long field_94070_G;
     @Shadow private Slot theSlot;
 
+    @Shadow protected static RenderItem itemRenderer;
+    @Shadow protected boolean field_94076_q;
+
+    @Shadow public Container inventorySlots;
+
     @Shadow protected abstract void handleMouseClick(Slot par1Slot, int par2, int par3, int par4);
     @Shadow protected abstract void drawSlotInventory(Slot par1Slot);
+    @Shadow public abstract Slot getSlotAtPosition(int par1, int par2);
+
+    @Inject(method = "mouseClicked", at = @At(
+            value = "HEAD"), cancellable = true)
+    private void jbp$addExtendedClickFunctionality(
+            int x, int y,
+            int clickType, CallbackInfo ci) {
+        // Initialize drag data
+        modifiedSlots.clear();
+        interactionType = -1;
+
+        ItemStack stack = this.mc.thePlayer.inventory.getItemStack();
+        if (stack != null && clickType == 1 && stack.getItem() instanceof ItemWithInventory) {
+            this.field_94076_q = true;
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "mouseMovedOrUp", at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/src/GuiContainer;handleMouseClick(Lnet/minecraft/src/Slot;III)V",
-            ordinal = 9), cancellable = true)
+            value = "HEAD"), cancellable = true)
     private void jbp$addExtendedFunctionality(
-            int par1, int par2, int par3,
-            CallbackInfo ci,
-            @Local(ordinal = 0) Slot slot) {
-        // Check if right-clicking over stack
-        if (par3 == 1 && slot != null && slot.getHasStack()) {
-            // Does stack have extended interactions?
-            if (slot.getStack().getItem() instanceof IItemExtendedInteraction) {
-                // Send our own packet
-                this.handleMouseClick(slot, slot.getSlotIndex(), par3, (Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54)) ? 1 : 0);
-                jbp$handleStack();
-                ci.cancel();
+            int x, int y, int clickType,
+            CallbackInfo ci) {
+        // Stop if this is the end of a drag
+        if (!modifiedSlots.isEmpty()) {
+            ci.cancel();
+            jbp$handleStack();
+        }
+    }
+
+    @Inject(method = "mouseClickMove", at = @At(value = "HEAD"), cancellable = true)
+    private void jbp$addExtendedDragFunctionality(
+            int x, int y, int clickType,
+            long unused, CallbackInfo ci) {
+        // Get slot and item
+        Slot slot = this.getSlotAtPosition(x, y);
+        ItemStack cursorStack = this.mc.thePlayer.inventory.getItemStack();
+
+        if (slot != null && cursorStack != null && cursorStack.getItem() instanceof ItemWithInventory) {
+            // Run click interaction for each new slot the drag reaches
+            boolean mouseHeld = this.field_94076_q && clickType == 1;
+            boolean modifiedSlot = modifiedSlots.containsKey(slot);
+            boolean isValid = slot.isItemValid(cursorStack);
+            boolean canDrag = this.inventorySlots.canDragIntoSlot(slot);
+
+            if (canDrag && mouseHeld && isValid && !modifiedSlot) {
+                // Determine interaction type for this drag
+                if (interactionType == -1) {
+                    interactionType = isShiftKeyDown() ? INTERACTION_INSERT : INTERACTION_EXTRACT;
+                }
+
+                // Do not interact with other backpack items
+                if (slot.getHasStack() && slot.getStack().getItem() instanceof ItemWithInventory) {
+                    modifiedSlots.put(slot, false);
+                    ci.cancel();
+                    return;
+                }
+
+                // Handle interaction
+                if (interactionType == INTERACTION_INSERT) {
+                    modifiedSlots.put(slot, slot.getHasStack());
+                    if (slot.getHasStack()) {
+                        this.handleMouseClick(slot, slot.getSlotIndex(), 1, 0);
+                    }
+                } else if (interactionType == INTERACTION_EXTRACT) {
+                    modifiedSlots.put(slot, !slot.getHasStack());
+                    if (!slot.getHasStack()) {
+                        this.handleMouseClick(slot, slot.getSlotIndex(), 1, 1);
+                    }
+                }
             }
+
+            ci.cancel();
         }
     }
 
@@ -55,6 +131,15 @@ public abstract class GuiContainerMixin extends GuiScreen {
             ordinal = 1
     ), cancellable = true)
     private void jbp$drawTooltipWithItem(CallbackInfo ci, @Local(ordinal = 0, argsOnly = true) int x, @Local(ordinal = 1, argsOnly = true)  int y) {
+        ItemStack cursorStack = mc.thePlayer.inventory.getItemStack();
+        if (cursorStack != null && cursorStack.getItem() instanceof ItemWithInventory inv) {
+            if (inv.hasProperCompoundTag(cursorStack)) {
+                this.jbp$renderTooltipWithStackContents(cursorStack, x, y);
+                ci.cancel();
+                return;
+            }
+        }
+
         if (this.theSlot != null && this.theSlot.getHasStack()) {
             ItemStack stackOver = this.theSlot.getStack();
             if (stackOver.getItem() instanceof ItemWithInventory inv && inv.hasProperCompoundTag(stackOver)) {
@@ -64,8 +149,25 @@ public abstract class GuiContainerMixin extends GuiScreen {
         }
     }
 
+    @Inject(method = "drawSlotInventory", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/src/InventoryPlayer;getItemStack()Lnet/minecraft/src/ItemStack;"))
+    private void setHighlight(
+            Slot slot, CallbackInfo ci,
+            @Local(ordinal = 0) int x,
+            @Local(ordinal = 1) int y) {
+        if (modifiedSlots.containsKey(slot) && this.inventorySlots.canDragIntoSlot(slot)) {
+            if (modifiedSlots.get(slot))
+                drawRect(x, y, x + 16, y + 16, -2130706433);
+        }
+    }
+
     @Unique
     private void jbp$handleStack() {
+        // Clear modified slots
+        modifiedSlots.clear();
+
+        // Reset click state (click no longer held)
         if (Minecraft.getMinecraft()
                 .thePlayer.inventory.getItemStack() == null) {
             this.field_94070_G = 0L;
@@ -76,24 +178,35 @@ public abstract class GuiContainerMixin extends GuiScreen {
     @Unique
     private void jbp$renderTooltipWithStackContents(ItemStack stack, int x, int y) {
         // Declare variables
-        int invSize = ((ItemWithInventory) stack.getItem()).inventorySize;
-        BackpackInventory inv = new BackpackInventory(stack, invSize);
+        ItemWithInventory invItem = (ItemWithInventory) stack.getItem();
+        BackpackInventory inv = new BackpackInventory(stack, invItem.inventorySize);
+        int invSize = inv.getSizeInventory();
         int invSelected = inv.currentSlotID;
         Pair<Integer, Integer> grid = ((ItemWithInventory) stack.getItem()).getInvGridArrangement();
+        List<String> tooltipList = stack.getTooltip(mc.thePlayer, false);
 
         int posX = x + 12;
         int posY = y - 12;
         int width, height;
 
         // Prepare for render
-        GL11.glDisable(32826);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
         RenderHelper.disableStandardItemLighting();
-        GL11.glDisable(2896);
-        GL11.glDisable(2929);
 
         // Precalculate width
-        width = Math.max(fontRenderer.getStringWidth(stack.getDisplayName()), grid.getLeft() * 18 + 2);
-        height = Math.max(12, 10 + grid.getRight() * 20);
+        width = (grid.getLeft() < invSize ? grid.getLeft() : invSize) * 18 + 2;
+        for (String string : tooltipList)
+            width = Math.max(width, fontRenderer.getStringWidth(string));
+
+        height = 10;
+        int size = Math.max(invSize, 1);
+        while (size > 0) {
+            size -= grid.getLeft();
+            height += 18;
+        }
+        height += tooltipList.size() * 9;
 
         // Handle screen margins
         if (posX + width > this.width) {
@@ -119,49 +232,69 @@ public abstract class GuiContainerMixin extends GuiScreen {
         this.drawGradientRect(posX - 3, posY - 3, posX + width + 3, posY - 3 + 1, var10, var10);
         this.drawGradientRect(posX - 3, posY + height + 2, posX + width + 3, posY + height + 3, var11, var11);
 
-        // Draw name
-        String itemName = stack.getDisplayName();
-        this.fontRenderer.drawStringWithShadow(itemName, posX, posY, -1);
+        // Draw tooltip strings
+        for (int i = 0; i < tooltipList.size(); i++) {
+            if (i == 0) {
+                this.fontRenderer.drawStringWithShadow(tooltipList.get(i), posX, posY, -1);
+                continue;
+            }
+            this.fontRenderer.drawStringWithShadow(
+                    tooltipList.get(i), posX, posY + height - ((10 * tooltipList.size()) - 10 * i) + 2, -1);
+        }
 
+
+        // Prep render of backpack slot tex
         this.zLevel = 0.0f;
         itemRenderer.zLevel = 0.0f;
-        GL11.glEnable(2896);
-        GL11.glEnable(2929);
-        RenderHelper.enableStandardItemLighting();
-        GL11.glEnable(32826);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GL11.glTranslatef(0F, 0F, 250F);
+        this.mc.renderEngine.bindTexture(WIDGET_TEXURE);
+        // Render slots
+        for (int gridY = 0; gridY < grid.getRight(); gridY++) {
+            for (int gridX = 0; gridX < grid.getLeft(); gridX++) {
+                // Dont render if outside of inventory
+                if ((gridY * grid.getLeft()) + gridX >= Math.max(invSize, 1))
+                    break;
 
-        // Prep render of backpack slots
+                int stackX = posX + 1 + (gridX * 18);
+                int stackY = posY + 11 + (gridY * 18);
+                drawTexturedModalRect(stackX, stackY, 0, 0, 18, 18);
+            }
+        }
+
+        // Prep render of backpack items
         RenderHelper.enableGUIStandardItemLighting();
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240F, 240F);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GL11.glTranslatef(0F, 0F, 500F);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        GL11.glTranslatef(0F, 0F, 250F);
 
-        for (int gridY = 0; gridY < invSize / grid.getRight(); gridY++) {
+        // Render items
+        for (int gridY = 0; gridY < grid.getRight(); gridY++) {
             for (int gridX = 0; gridX < grid.getLeft(); gridX++) {
                 int invPos = ((gridY) * grid.getLeft()) + gridX;
-                int stackX = posX + 2 + (gridX * 18);
-                int stackY = posY + 12 + (gridY * 20);
-
+                // Dont render if outside of inventory
                 if (invPos >= invSize)
                     break;
 
-                ItemStack stackAt = inv.getStackInSlot(invPos);
+                int stackX = posX + 2 + (gridX * 18);
+                int stackY = posY + 12 + (gridY * 18);
 
-                if (invPos == invSelected && !(Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54))) {
-                    drawRect(stackX, stackY, stackX + 16, stackY + 16, 0x55FFFFFF);
-                } else if (stackAt == null) {
-                    drawRect(stackX + 2, stackY + 2, stackX + 14, stackY + 14, 0x33FFFFFF);
-                    continue;
-                }
                 drawSlotInventory(new Slot(inv, invPos, stackX, stackY));
+                if (invPos == invSelected && !isShiftKeyDown()) {
+                    // Draw slot selection overlay
+                    GL11.glDisable(GL11.GL_LIGHTING);
+                    GL11.glDisable(GL11.GL_DEPTH_TEST);
+                    this.drawGradientRect(stackX, stackY, stackX + 16, stackY + 16, -2130706433, -2130706433);
+                    GL11.glEnable(GL11.GL_LIGHTING);
+                    GL11.glEnable(GL11.GL_DEPTH_TEST);
+                }
 
             }
         }
 
-        GL11.glEnable(2896);
-        GL11.glEnable(2929);
+        GL11.glTranslatef(0F, 0F, -500F);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
         RenderHelper.enableStandardItemLighting();
     }
-
-
 }
