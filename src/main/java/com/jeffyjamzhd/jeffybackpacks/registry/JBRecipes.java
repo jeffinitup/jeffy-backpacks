@@ -6,7 +6,10 @@ import btw.item.BTWItems;
 import btw.item.tag.BTWTags;
 import btw.item.tag.TagInstance;
 import btw.item.tag.TagOrStack;
+import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeAddFilter;
 import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeBundle;
+import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeRemoveFilter;
+import net.minecraft.src.CraftingManager;
 import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.ShapedRecipes;
@@ -61,6 +64,17 @@ public class JBRecipes {
                         'C', BTWBlocks.chest
                 }
         );
+        RecipeManager.addShapelessRecipe(
+                new ItemStack(JBItems.filter),
+                new Object[]{
+                        new ItemStack(Item.nameTag),
+                        new ItemStack(BTWItems.soulUrn),
+                }
+        );
+
+        // Add custom shapeless recipe types
+        CraftingManager.getInstance().getRecipes().add(new RecipeAddFilter());
+        CraftingManager.getInstance().getRecipes().add(new RecipeRemoveFilter());
     }
 
     private static void registerStokedCauldron() {

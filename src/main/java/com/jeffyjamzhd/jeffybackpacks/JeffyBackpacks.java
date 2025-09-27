@@ -2,6 +2,7 @@ package com.jeffyjamzhd.jeffybackpacks;
 
 import btw.BTWAddon;
 import com.jeffyjamzhd.jeffybackpacks.registry.*;
+import net.minecraft.src.Item;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +31,7 @@ public class JeffyBackpacks extends BTWAddon {
         JBItems.register();
         JBTags.register();
         JBRecipes.register();
+        JBPenalties.register();
         JBAchievements.register();
         JBSounds.register();
 

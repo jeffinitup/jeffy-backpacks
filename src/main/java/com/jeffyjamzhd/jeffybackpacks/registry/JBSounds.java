@@ -9,6 +9,8 @@ public class JBSounds {
             new AddonSoundRegistryEntry("jbp:misc.backpack.insert", 3);
     public static final AddonSoundRegistryEntry BACKPACK_FULL =
             new AddonSoundRegistryEntry("jbp:misc.backpack.full");
+    public static final AddonSoundRegistryEntry FILTER_WRITE =
+            new AddonSoundRegistryEntry("jbp:misc.filter.write", 3);
 
     public static void register() {
     }

@@ -2,7 +2,8 @@ package com.jeffyjamzhd.jeffybackpacks.item;
 
 import btw.item.items.ArmorItem;
 import btw.item.util.ItemUtils;
-import com.jeffyjamzhd.jeffybackpacks.api.IItemExtendedInteraction;
+import com.jeffyjamzhd.jeffybackpacks.inventory.FilterInventory;
+import com.jeffyjamzhd.jeffylib.api.IItemExtendedInteraction;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBPackets;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;
@@ -49,7 +50,7 @@ public class ItemWithInventory extends ArmorItem
     }
 
     @Override
-    public void jbp$onItemDestroyed(ItemStack stack, World world, double x, double y, double z) {
+    public void jl$onItemDestroyed(ItemStack stack, World world, double x, double y, double z) {
         if (!world.isRemote) {
             // Create inventory
             BackpackInventory inv = createInventory(stack);
@@ -73,10 +74,13 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public void onUpdate(ItemStack stack, World world, EntityPlayer entity, int iInventorySlot, boolean bIsHandHeldItem) {
         super.onUpdate(stack, world, entity, iInventorySlot, bIsHandHeldItem);
+
         if (!hasProperCompoundTag(stack)) {
+            // Create tag for this item, if one doesn't exist
             BackpackInventory inv = createInventory(stack);
             stack.stackTagCompound = inv.writeToNBT(stack.getTagCompound());
         }
+
     }
 
     /**
@@ -91,7 +95,7 @@ public class ItemWithInventory extends ArmorItem
     @Override
     public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
         // Null out armor stuff if necessary
-        return jbp$canBeWorn() ? super.onItemRightClick(stack, world, player) : stack;
+        return jl$canBeWorn() ? super.onItemRightClick(stack, world, player) : stack;
     }
 
     @Override
@@ -102,18 +106,25 @@ public class ItemWithInventory extends ArmorItem
 
         super.addInformation(stack, player, stringList, shift);
         if (hasProperCompoundTag(stack)) {
-            if (slotCount > 1) {
-                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
-                        "%s slots available".formatted(slotCount) + EnumChatFormatting.RESET);
-            } else if (slotCount == 1) {
-                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
-                        "1 slot available" + EnumChatFormatting.RESET);
-            } else {
-                stringList.add(EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
-                        "Full" + EnumChatFormatting.RESET);
-            }
+            // Determine tooltip
+            String slotCountString;
+            if (slotCount > 1)
+                slotCountString = I18n.getStringParams("tooltip.backpack.slots", slotCount);
+            else if (slotCount == 1)
+                slotCountString = I18n.getStringParams("tooltip.backpack.slot", slotCount);
+            else
+                slotCountString = I18n.getString("tooltip.backpack.full");
+
+            // Add to list
+            slotCountString = addStringFormatting(slotCountString);
+            stringList.add(slotCountString);
         }
 
+        // Add filter field
+        if (hasFilterTag(stack)) {
+            String filterString = addStringFormatting(I18n.getString("tooltip.backpack.filtered"));
+            stringList.add(filterString);
+        }
     }
 
     //***       IItemExtendedInteraction        ***//
@@ -126,6 +137,11 @@ public class ItemWithInventory extends ArmorItem
         }
         int selectedSlot = getSelectedSlot(item);
         sendInventoryPositionPacket(slotID, selectedSlot);
+    }
+
+    @Override
+    public boolean canInteractWithSelf(ItemStack itemStack, ItemStack itemStack1) {
+        return false;
     }
 
     @Override
@@ -153,6 +169,9 @@ public class ItemWithInventory extends ArmorItem
         if (invStack != null) {
             playExtractSFX(world, player);
         }
+
+        // Mark for update
+        player.inventory.onInventoryChanged();
     }
 
     @Override
@@ -176,6 +195,8 @@ public class ItemWithInventory extends ArmorItem
             playExtractSFX(world, player);
         }
 
+        // Mark for update
+        player.inventory.onInventoryChanged();
         return invStack;
     }
 
@@ -196,6 +217,8 @@ public class ItemWithInventory extends ArmorItem
                 playFullSFX(world, player);
             }
 
+            // Mark for update
+            player.inventory.onInventoryChanged();
             player.inventory.setItemStack(result);
         }
     }
@@ -217,6 +240,8 @@ public class ItemWithInventory extends ArmorItem
                 playFullSFX(world, player);
             }
 
+            // Mark for update
+            player.inventory.onInventoryChanged();
             return result;
         }
         return slotStack;
@@ -237,16 +262,67 @@ public class ItemWithInventory extends ArmorItem
 
         // Play sound
         Minecraft.getMinecraft().sndManager.playSoundFX("random.click", 0.5F, 1.8F + (itemRand.nextFloat() * 0.2F));
+
+        // Mark for update
+        player.inventory.onInventoryChanged();
     }
 
     //***       Class specific methods        ***//
+
+    /**
+     * Called by player inventory, for merging stack from world -> item inventory
+     */
+    public int putStackInInventory(ItemStack backpack, ItemStack stack,
+                                   EntityPlayer player, World world) {
+
+        if (isItemValidForInsertion(stack) && stackMatchesFilter(backpack, stack)) {
+            // Create inventory and put stack inside
+            BackpackInventory inv = createInventory(backpack);
+            ItemStack result = inv.putStackSmart(stack);
+            backpack.stackTagCompound = inv.writeToNBT(backpack.getTagCompound());
+
+            // Play sfx and return stack size
+            if (result == null || !stack.isItemEqual(result)) {
+                if (!world.isRemote)
+                    JBPackets.sendInsertSFXPacket(((EntityPlayerMP) player).playerNetServerHandler);
+            }
+
+            // Mark for update
+            player.inventory.onInventoryChanged();
+            return result == null ? 0 : result.stackSize;
+        }
+        return stack.stackSize;
+    }
+
+    /**
+     * {@code true} if provided {@link ItemStack} matches tag within this {@code ItemWithInventory}
+     */
+    public boolean stackMatchesFilter(ItemStack backpack, ItemStack stack) {
+        NBTTagCompound compound = backpack.getTagCompound();
+        if (compound != null) {
+            if (compound.hasKey("FilterInventory")) {
+                FilterInventory filter = new FilterInventory(compound);
+                return filter.matches(stack);
+            }
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * Gets the amount of items currently in the provided stack.
+     */
+    public int getItemCountInStack(ItemStack stack) {
+        BackpackInventory inv = createInventory(stack);
+        return inv.getSizeInventory();
+    }
 
     /**
      * {@code true} if provided {@link ItemStack} is able to
      * be inserted into this item
      */
     public boolean isItemValidForInsertion(ItemStack stack) {
-        return true;
+        return !(stack.getItem() instanceof ItemWithInventory);
     }
 
     /**
@@ -319,7 +395,23 @@ public class ItemWithInventory extends ArmorItem
         }
         NBTTagCompound tag = stack.getTagCompound();
         if (tag != null) {
-            return tag.hasKey("BackpackInventory");
+            BackpackInventory inv = createInventory(stack);
+            return tag.hasKey(inv.getRootTagString());
+        }
+        return false;
+    }
+
+    /**
+     * {@code true} if the provided stack has a filter applied
+     */
+    public boolean hasFilterTag(ItemStack stack) {
+        if (!stack.hasTagCompound()) {
+            return false;
+        }
+        NBTTagCompound tag = stack.getTagCompound();
+        if (tag != null) {
+            BackpackInventory inv = createInventory(stack);
+            return tag.hasKey("FilterInventory") && tag.hasKey("BackpackInventory");
         }
         return false;
     }
@@ -336,7 +428,7 @@ public class ItemWithInventory extends ArmorItem
     /**
      * Shorthand for creating an inventory instance for interaction handling
      */
-    private BackpackInventory createInventory(ItemStack stack) {
+    public BackpackInventory createInventory(ItemStack stack) {
         return new BackpackInventory(stack, inventorySize);
     }
 
@@ -401,5 +493,17 @@ public class ItemWithInventory extends ArmorItem
     @Environment(EnvType.CLIENT)
     public Icon getIconFromDamageForRenderPass(int damage, int pass) {
         return pass == 1 && hasSecondPass ? secondPassIcon : super.getIconFromDamageForRenderPass(damage, pass);
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean hasEffect(ItemStack stack) {
+        return hasFilterTag(stack);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public String addStringFormatting(String string) {
+        return EnumChatFormatting.GRAY.toString() + EnumChatFormatting.ITALIC +
+                string + EnumChatFormatting.RESET;
     }
 }

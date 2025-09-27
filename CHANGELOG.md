@@ -2,6 +2,15 @@
 Addon created by jeffyjamzhd, for use with Better Than Wolves CE.
 Special thanks to superdave for doing the branding art!
 ---
+## Version 0.3
+* Added Filters, which lets you define what items can or cant be picked up by a worn backpack
+* Any worn backpack will now pick up items if your inventory is full, indicated by a sound effect
+* Any worn backpack with a filter will pick up an item if it matches the filter's criteria
+* Lunchboxes can now hold drinkable food items, like milk and water bottles
+* Added a system for rendering unique textures for food items stored in the Lunchbox
+* New Lunchbox food textures (thepiratebananaraman1)
+* Chinese translation (Inf1nlty)
+---
 ## Version 0.2
 * Added the Lunchbox, which stores 4 stacks of food and can be directly eaten from
 * Reworked a lot of backpack interface rendering and functionality

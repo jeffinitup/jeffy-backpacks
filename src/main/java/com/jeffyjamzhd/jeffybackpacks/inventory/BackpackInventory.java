@@ -30,6 +30,16 @@ public class BackpackInventory implements IItemStackInventory {
         this.currentSlotID = readCurrentSlotFromNBT(compound);
     }
 
+    public BackpackInventory(NBTTagCompound tag, int inventorySize) {
+        // Prepare inventory
+        this.size = inventorySize;
+        this.inventory = new ArrayList<>();
+
+        // Read stack NBT
+        readFromNBT(tag);
+        this.currentSlotID = readCurrentSlotFromNBT(tag);
+    }
+
     @Override
     public void onInventoryChanged() {
         for (int index = 0; index < inventory.size(); index++) {
@@ -193,9 +203,13 @@ public class BackpackInventory implements IItemStackInventory {
         return currentSlotID;
     }
 
+    public String getRootTagString() {
+        return "BackpackInventory";
+    }
+
     public void readFromNBT(NBTTagCompound compound) {
         // Get inventory tag
-        NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
+        NBTTagCompound content = compound.getCompoundTag(getRootTagString());
         if (content == null)
             return;
 
@@ -233,7 +247,7 @@ public class BackpackInventory implements IItemStackInventory {
         backpack.setTag("ItemStacks", list);
         backpack.setInteger("CurrentSlotID", currentSlotID);
         backpack.setInteger("Size", size);
-        compound.setTag("BackpackInventory", backpack);
+        compound.setTag(getRootTagString(), backpack);
         return compound;
     }
 
@@ -244,7 +258,7 @@ public class BackpackInventory implements IItemStackInventory {
     private int readCurrentSlotFromNBT(NBTTagCompound compound) {
         // Get value from tag
         if (compound != null) {
-            NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
+            NBTTagCompound content = compound.getCompoundTag(getRootTagString());
             if (content != null) {
                 // It has a set slot id, nice
                 int slotID = content.getInteger("CurrentSlotID");
@@ -262,7 +276,7 @@ public class BackpackInventory implements IItemStackInventory {
 
     public NBTTagCompound writeCurrentSlotToNBT(NBTTagCompound compound, int slotID) {
         if (compound != null) {
-            NBTTagCompound content = compound.getCompoundTag("BackpackInventory");
+            NBTTagCompound content = compound.getCompoundTag(getRootTagString());
             if (content != null) {
                 content.setInteger("CurrentSlotID", slotID);
             }

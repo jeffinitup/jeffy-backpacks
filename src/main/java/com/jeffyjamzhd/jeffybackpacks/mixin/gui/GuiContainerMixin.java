@@ -182,7 +182,7 @@ public abstract class GuiContainerMixin extends GuiScreen {
         List<String> tooltipList = stack.getTooltip(mc.thePlayer, false);
 
         ItemWithInventory invItem = (ItemWithInventory) stack.getItem();
-        BackpackInventory inv = new BackpackInventory(stack, invItem.inventorySize);
+        BackpackInventory inv = invItem.createInventory(stack);
         Pair<Integer, Integer> grid = ((ItemWithInventory) stack.getItem()).getInvGridArrangement();
 
         int invSize = inv.getSizeInventory();

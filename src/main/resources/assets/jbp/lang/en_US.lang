@@ -2,6 +2,7 @@ item.bundle.name=Bundle
 item.satchel.name=Satchel
 item.backpack.name=Backpack
 item.lunchbox.name=Lunchbox
+item.filter.name=Filter
 
 tag.jbp.backpacks=Backpacks
 tag.jbp.inventory_items=Items with an Inventory
@@ -21,3 +22,20 @@ achievement.jbp.craft_satchel=Not A Purse
 achievement.jbp.craft_satchel.desc=Craft a satchel using fabric and hemp fibers
 achievement.jbp.craft_backpack=Adventure Time!
 achievement.jbp.craft_backpack.desc=Craft a backpack using tanned leather and belts
+achievement.jbp.craft_filter=Smarter Backpacks
+achievement.jbp.craft_filter.desc=Craft a filter using a name tag and soul urn
+
+death.attack.crushed=%s tried to lift too much!
+
+tooltip.backpack.slot=%d slot available
+tooltip.backpack.slots=%d slots available
+tooltip.backpack.full=Full
+tooltip.backpack.filtered=Filtered
+
+tooltip.filter=Mode: %s
+tooltip.filter.whitelist=Whitelist
+tooltip.filter.blacklist=Blacklist
+
+status.backpack.weighted=Weighted
+status.backpack.encumbered=Encumbered
+status.backpack.crushed=Crushed

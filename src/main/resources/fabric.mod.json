@@ -24,9 +24,10 @@
   "custom": {
     "btw:addon_prefix": "JBP",
     "loom:injected_interfaces": {
-      "net/minecraft/src/GuiScreen": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IGuiScreen"],
-      "net/minecraft/src/ItemArmor": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItemArmor"],
-      "net/minecraft/src/Item": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IItem"]
+      "net/minecraft/src/InventoryPlayer": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IInventoryPlayer"],
+      "net/minecraft/src/EntityPlayer": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IEntityPlayer"],
+      "btw/util/status/StatusEffectBuilder": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffectBuilder"],
+      "btw/util/status/StatusEffect": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffect"]
     }
   },
   "mixins": [
@@ -35,6 +36,7 @@
   "accessWidener": "jbp.accessWidener",
   "depends": {
     "fabricloader": ">=0.15.6",
-    "minecraft": "1.6.4"
+    "minecraft": "1.6.4",
+    "jl": ">=0.1.0"
   }
 }

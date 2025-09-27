@@ -4,24 +4,21 @@
   "package": "com.jeffyjamzhd.jeffybackpacks.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "container.ContainerMixin",
-    "container.PlayerContainerMixin",
-    "container.slot.SlotArmorMixin",
+    "InventoryPlayerMixin",
+    "btw.status.StatusEffectBuilderMixin",
+    "btw.status.StatusEffectMixin",
     "crafting.BulkCraftingManagerMixin",
     "emi.ButtonWidgetMixin",
     "emi.EmiInfoRecipeMixin",
     "entity.EntityItemMixin",
-    "entity.EntityPlayerMixin",
-    "item.ItemMixin",
-    "item.ItemArmorMixin"
+    "entity.EntityLivingBaseMixin",
+    "entity.EntityPlayerMixin"
   ],
   "client": [
     "gui.GuiContainerMixin",
-    "gui.GuiScreenMixin",
     "render.RenderPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "plugin": "com.jeffyjamzhd.jeffybackpacks.mixin.MixinConfig"
+  }
 }
