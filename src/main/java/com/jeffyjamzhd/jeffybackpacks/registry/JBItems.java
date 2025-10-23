@@ -3,8 +3,10 @@ package com.jeffyjamzhd.jeffybackpacks.registry;
 import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemFilter;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemLunchbox;
+import com.jeffyjamzhd.jeffybackpacks.item.ItemTrowel;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import emi.shims.java.com.unascribed.retroemi.Pair;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.CreativeTabs;
 import net.minecraft.src.Item;
 
@@ -16,12 +18,14 @@ public class JBItems {
             .setUnlocalizedName("bundle")
             .setTextureName("jbp:bundle")
             .jl$setModNamespace("jbp");
-    public static Item satchel = new ItemWithInventory(31001, new Pair<>(3, 3))
+    public static ItemWithInventory satchel =
+            (ItemWithInventory) new ItemWithInventory(31001, new Pair<>(3, 3))
             .setCreativeTab(CreativeTabs.tabTools)
             .setUnlocalizedName("satchel")
             .setTextureName("jbp:satchel")
             .jl$setModNamespace("jbp");
-    public static Item backpack = new ItemWithInventory(31002, new Pair<>(6, 3))
+    public static ItemWithInventory backpack =
+            (ItemWithInventory) new ItemWithInventory(31002, new Pair<>(6, 3))
             .setCreativeTab(CreativeTabs.tabTools)
             .setUnlocalizedName("backpack")
             .setTextureName("jbp:backpack")
@@ -37,6 +41,12 @@ public class JBItems {
             .setUnlocalizedName("filter")
             .setTextureName("minecraft:name_tag")
             .jl$setModNamespace("jbp");
+    public static Item trowel = new ItemTrowel(31005)
+            .setCreativeTab(CreativeTabs.tabTools)
+            .setUnlocalizedName("trowel")
+            .setTextureName("jbp:trowel")
+            .jl$setModNamespace("jbp")
+            .hideFromEMI();
 
     public static void register() {
         JeffyBackpacks.logInfo("Registering items...");

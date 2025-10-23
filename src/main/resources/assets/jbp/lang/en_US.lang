@@ -1,31 +1,39 @@
 item.bundle.name=Bundle
 item.satchel.name=Satchel
+item.satchel.filter.name=Satchel (with Filter)
 item.backpack.name=Backpack
+item.backpack.filter.name=Backpack (with Filter)
 item.lunchbox.name=Lunchbox
+item.trowel.name=Iron Trowel
 item.filter.name=Filter
 
 tag.jbp.backpacks=Backpacks
-tag.jbp.inventory_items=Items with an Inventory
+tag.jbp.inventory_items=Items With An Inventory
+tag.jbp.colored_bags=Bags That Can Be Dyed
 
 jbp.inventory_items.info.1=These are items that have an inventory. Depending on how many of these items are on your person, and how full each of them are, you will begin to feel more encumbered.
 jbp.inventory_items.info.2=Scrolling the mouse wheel sets the current highlighted slot. Right clicking on the item will pull the selected item out. Right clicking on the item with another item will put it inside of the item's inventory. Shift right clicking on the item will put the last item in your inventory. Holding the inventory item with your cursor and dragging will either insert or eject items depending on if shift is held.
 jbp.backpacks.info=Backpacks can be worn on your back to lessen it's weight penalties. Worn backpacks also automatically pick up items if your inventory is full.
+jbp.filter.info=Filters will automatically insert items into their attached bag based on what mode it is in and what items are transcribed. It supports whitelisting certain items, and blacklisting certain items. You can provide an empty blacklist to allow your worn bag to pick up items before your main inventory does.
 jbp.lunchbox.info=Lunchboxes only allow food items to be stored within. When right clicking with a lunchbox in your hand, you'll consume the last food item you put in there.
-jbp.bundle.info=Bundles, unlike conventional backpacks, cannot be worn. Bundles can function as a block palette, where right clicking a block will place a random block stored within bundle's inventory.
+jbp.trowel.info.1=Trowels only allow blocks and mortar to be stored within. Trowels will randomly pick a block from their inventory, and place them in the world. If theres mortar in the trowel's inventory, it will attempt to mortar any placed blocks.
+jbp.trowel.info.2=The amount of mortar on the trowel is represented by the number counter on the item. You cannot get the mortar items back after putting them on the trowel
 
 achievementtab.jeffy_backpacks=Jeffy Backpacks
 achievement.jbp.craft_bundle=My Bundle of Joy
-achievement.jbp.craft_bundle.desc=Craft a bundle using wool knit and string
+achievement.jbp.craft_bundle.desc=Craft a bundle, your first storage item
+achievement.jbp.craft_trowel=Mortarfied
+achievement.jbp.craft_trowel.desc=Craft an iron trowel, which lets you place blocks randomly and automatically mortar loose blocks
 achievement.jbp.craft_lunchbox=Ready for Launch
-achievement.jbp.craft_lunchbox.desc=Craft a lunchbox using iron ingots and a chest
-achievement.jbp.craft_satchel=Not A Purse
+achievement.jbp.craft_lunchbox.desc=Craft a lunchbox, which provides convenient food storage
+achievement.jbp.craft_satchel=It's Not A Purse!
 achievement.jbp.craft_satchel.desc=Craft a satchel using fabric and hemp fibers
 achievement.jbp.craft_backpack=Adventure Time!
 achievement.jbp.craft_backpack.desc=Craft a backpack using tanned leather and belts
-achievement.jbp.craft_filter=Smarter Backpacks
-achievement.jbp.craft_filter.desc=Craft a filter using a name tag and soul urn
+achievement.jbp.craft_filter=What is My Purpose?
+achievement.jbp.craft_filter.desc=Craft a filter, which allows you to whitelist or blacklist items for automatic pickup
 
-death.attack.crushed=%s tried to lift too much!
+death.attack.crushed=%s tried to lift more than they could handle!
 
 tooltip.backpack.slot=%d slot available
 tooltip.backpack.slots=%d slots available

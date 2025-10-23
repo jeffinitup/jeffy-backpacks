@@ -47,7 +47,7 @@ public abstract class GuiContainerMixin extends GuiScreen {
 
     @Shadow public Container inventorySlots;
 
-    @Shadow protected abstract void handleMouseClick(Slot par1Slot, int par2, int par3, int par4);
+    @Shadow public abstract void handleMouseClick(Slot par1Slot, int par2, int par3, int par4);
     @Shadow protected abstract void drawSlotInventory(Slot par1Slot);
     @Shadow public abstract Slot getSlotAtPosition(int par1, int par2);
 
@@ -59,12 +59,6 @@ public abstract class GuiContainerMixin extends GuiScreen {
         // Initialize drag data
         modifiedSlots.clear();
         interactionType = -1;
-
-        ItemStack stack = this.mc.thePlayer.inventory.getItemStack();
-        if (stack != null && clickType == 1 && stack.getItem() instanceof ItemWithInventory) {
-            this.field_94076_q = true;
-            ci.cancel();
-        }
     }
 
     @Inject(method = "mouseMovedOrUp", at = @At(

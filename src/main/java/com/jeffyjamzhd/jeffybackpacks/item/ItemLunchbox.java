@@ -1,7 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.item;
 
 import btw.item.items.BucketItemDrinkable;
-import btw.item.items.FoodItem;
 import btw.item.util.ItemUtils;
 import btw.util.sounds.BTWSoundManager;
 import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
@@ -11,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
 
-import java.net.URI;
 import java.util.HashMap;
 
 public class ItemLunchbox extends ItemWithInventory {
@@ -31,7 +29,8 @@ public class ItemLunchbox extends ItemWithInventory {
             if (canConsume(player, firstStack)) {
                 if (world.isRemote) {
                     stack.setItemDamage(foodIcons.containsKey(inv.getFirstStack().itemID) ? inv.getFirstStack().itemID : 1);
-                    Minecraft.getMinecraft().sndManager.playSoundFX(BTWSoundManager.CHEST_OPEN.sound(), 0.7F, 1.5F);
+                    player.playSound(BTWSoundManager.CHEST_OPEN.sound(),
+                            0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
                 }
                 player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
             } else {
@@ -51,7 +50,8 @@ public class ItemLunchbox extends ItemWithInventory {
             // Run food eating method
             if (world.isRemote) {
                 stack.setItemDamage(0);
-                Minecraft.getMinecraft().sndManager.playSoundFX(BTWSoundManager.CHEST_CLOSE.sound(), 0.7F, 1.5F);
+                player.playSound(BTWSoundManager.CHEST_CLOSE.sound(),
+                        0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
             }
 
             // Run eat method
@@ -71,7 +71,8 @@ public class ItemLunchbox extends ItemWithInventory {
         super.onPlayerStoppedUsing(stack, world, player, duration);
         if (world.isRemote) {
             stack.setItemDamage(0);
-            Minecraft.getMinecraft().sndManager.playSoundFX(BTWSoundManager.CHEST_CLOSE.sound(), 0.7F, 1.5F);
+            player.playSound(BTWSoundManager.CHEST_CLOSE.sound(),
+                    0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
     }
 

@@ -11,8 +11,8 @@ import net.minecraft.src.*;
 import java.io.*;
 
 public class JBPackets {
-    public static String PACKET_S2C_INSERT_SFX = "jbp|insertItemToBackpack";
-    public static String PACKET_C2S_UPDATE_SCROLL = "jbp|inventoryPosition";
+    public static String PACKET_S2C_INSERT_SFX = "jbp|insertSFX";
+    public static String PACKET_C2S_UPDATE_SCROLL = "jbp|invPos";
     public static String PACKET_C2S_FILTER_EMI = "jbp|filterEMI";
 
     public static void register(JeffyBackpacks addon) {
@@ -135,6 +135,9 @@ public class JBPackets {
 
             // Do the client thing on the server doohickey
             Container container = player.openContainer;
+            if (container.inventorySlots.size() < slotID)
+                return;
+
             Slot slot = container.getSlot(slotID);
             if (slot != null && slot.getHasStack()) {
                 ItemStack stack = slot.getStack();

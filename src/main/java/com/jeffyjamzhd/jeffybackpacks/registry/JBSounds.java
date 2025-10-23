@@ -11,6 +11,8 @@ public class JBSounds {
             new AddonSoundRegistryEntry("jbp:misc.backpack.full");
     public static final AddonSoundRegistryEntry FILTER_WRITE =
             new AddonSoundRegistryEntry("jbp:misc.filter.write", 3);
+    public static final AddonSoundRegistryEntry CRUSHED =
+            new AddonSoundRegistryEntry("jbp:misc.crushed", 2);
 
     public static void register() {
     }

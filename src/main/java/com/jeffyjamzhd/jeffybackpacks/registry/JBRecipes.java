@@ -16,6 +16,8 @@ import net.minecraft.src.ShapedRecipes;
 
 public class JBRecipes {
     public static ShapedRecipes bundleRecipe;
+    public static final RecipeAddFilter RECIPE_TYPE_ADD_FILTER;
+    public static final RecipeRemoveFilter RECIPE_TYPE_REMOVE_FILTER;
 
     /**
      * Registers addon recipes
@@ -73,8 +75,8 @@ public class JBRecipes {
         );
 
         // Add custom shapeless recipe types
-        CraftingManager.getInstance().getRecipes().add(new RecipeAddFilter());
-        CraftingManager.getInstance().getRecipes().add(new RecipeRemoveFilter());
+        CraftingManager.getInstance().getRecipes().add(RECIPE_TYPE_ADD_FILTER);
+        CraftingManager.getInstance().getRecipes().add(RECIPE_TYPE_REMOVE_FILTER);
     }
 
     private static void registerStokedCauldron() {
@@ -88,5 +90,10 @@ public class JBRecipes {
                 new TagOrStack[]{
                         new ItemStack(JBItems.lunchbox)
                 });
+    }
+
+    static {
+        RECIPE_TYPE_ADD_FILTER = new RecipeAddFilter();
+        RECIPE_TYPE_REMOVE_FILTER = new RecipeRemoveFilter();
     }
 }

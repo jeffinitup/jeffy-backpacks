@@ -4,6 +4,7 @@ import btw.util.status.StatusCategory;
 import btw.util.status.StatusEffect;
 import com.jeffyjamzhd.jeffybackpacks.api.impl.IEntityPlayer;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
+import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
@@ -110,7 +111,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase implements IEnt
                     // Damage player and reset timer
                     this.attackEntityFrom(source, damageValue);
                     this.getEntityWorld()
-                            .playSoundAtEntity(this, "random.classic_hurt", 0.8F, 0.6F + this.rand.nextFloat() * 0.1F);
+                            .playSoundAtEntity(this, JBSounds.CRUSHED.sound(), 0.8F, 0.6F + this.rand.nextFloat() * 0.1F);
                     jbp$ticksUntilNextDOT.put(status, reset);
                 }
 
@@ -123,7 +124,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase implements IEnt
 
                 this.attackEntityFrom(source, damage);
                 this.getEntityWorld()
-                        .playSoundAtEntity(this, "random.classic_hurt", 0.8F, 0.6F + this.rand.nextFloat() * 0.1F);
+                        .playSoundAtEntity(this, JBSounds.CRUSHED.sound(), 0.8F, 0.6F + this.rand.nextFloat() * 0.1F);
                 jbp$ticksUntilNextDOT.put(status, ticks);
             }
         }
@@ -148,6 +149,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase implements IEnt
             // Add to total if item is valid
             if (stack.getItem() instanceof ItemWithInventory inv) {
                 total += inv.getItemCountInStack(stack);
+            } else {
+                total += 1;
             }
         }
 
@@ -160,12 +163,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBase implements IEnt
             if (stack.getItem() instanceof ItemWithInventory inv) {
                 // Dampen value slightly since the backpack is worn
                 int count = inv.getItemCountInStack(stack);
-                count = Math.max(0, count - 9);
+                count = Math.max(0, count - 12);
                 total += count;
+            } else {
+                total += 1;
             }
         }
 
-        jbp$itemsInsideBackpacks = total;
+        jbp$itemsInsideBackpacks = Math.max(0, total - 40);
     }
 
     @Override

@@ -6,9 +6,15 @@ Special thanks to superdave for doing the branding art!
 * Added Filters, which lets you define what items can or cant be picked up by a worn backpack
 * Any worn backpack will now pick up items if your inventory is full, indicated by a sound effect
 * Any worn backpack with a filter will pick up an item if it matches the filter's criteria
+* Added worn satchel and backpack rendering
 * Lunchboxes can now hold drinkable food items, like milk and water bottles
 * Added a system for rendering unique textures for food items stored in the Lunchbox
-* New Lunchbox food textures (thepiratebananaraman1)
+* New Lunchbox food textures created by thepiratebananaraman1
+* Integration in KubiMesh/BaKuMe via. epic collaboration with Battosay
+* More EMI recipe integration
+* Fixed a bug with packet identifiers being too long
+* Fixed rendering bug with armor overlays
+* Fixed various minor crash bugs
 * Chinese translation (Inf1nlty)
 ---
 ## Version 0.2

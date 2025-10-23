@@ -23,6 +23,12 @@ public class JeffyBackpacksEMI implements EmiPlugin {
     public void register(EmiRegistry registry) {
         // Recipe handlers
         registry.addRecipe(new EMIBundleRecipe((RecipeBundle) JBRecipes.bundleRecipe));
+        registry.addRecipe(new EMIAddFilterRecipe());
+        JBTags.TAG_COLORED_BAGS.getItems()
+                .forEach(stack -> registry.addRecipe(new EMIBackpackDyeRecipe(stack.getItem())));
+        JBTags.TAG_BACKPACKS.getItems()
+                .forEach(stack -> registry.addRecipe(new EMIRemoveFilterRecipe(stack.getItem())));
+
 
         // Phantom stack handler
         addClickStackHandler(registry);
@@ -47,8 +53,15 @@ public class JeffyBackpacksEMI implements EmiPlugin {
                 null
         ));
         registry.addRecipe(new EmiInfoRecipe(
-                List.of(EmiStack.of(JBItems.bundle)),
-                List.of(Text.translatable("jbp.bundle.info")),
+                List.of(EmiStack.of(JBItems.filter)),
+                List.of(Text.translatable("jbp.filter.info")),
+                null
+        ));
+        registry.addRecipe(new EmiInfoRecipe(
+                List.of(EmiStack.of(JBItems.trowel)),
+                List.of(Text.translatable("jbp.trowel.info.1"),
+                        Text.literal(""),
+                        Text.translatable("jbp.trowel.info.2")),
                 null
         ));
     }

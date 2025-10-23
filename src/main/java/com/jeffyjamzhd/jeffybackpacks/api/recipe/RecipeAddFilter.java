@@ -20,7 +20,7 @@ public class RecipeAddFilter implements IRecipe {
             ItemStack stackAt = inventory.getStackInSlot(i);
             if (stackAt != null) {
                 // Test for backpack first
-                if (JBTags.TAG_BACKPACKS.test(stackAt)) {
+                if (JBTags.TAG_BACKPACKS.test(new ItemStack(stackAt.getItem()))) {
                     // Make sure it doesn't already have a filter
                     ItemWithInventory itemInv = (ItemWithInventory) stackAt.getItem();
                     if (itemInv.hasFilterTag(stackAt) || backpackStack != null)

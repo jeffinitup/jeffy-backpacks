@@ -13,6 +13,7 @@ public class JBAchievements {
     public static final Achievement<ItemStack> CRAFT_LUNCHBOX;
     public static final Achievement<ItemStack> CRAFT_SATCHEL;
     public static final Achievement<ItemStack> CRAFT_BACKPACK;
+    public static final Achievement<ItemStack> CRAFT_FILTER;
 
     public static void register() {
     }
@@ -39,7 +40,7 @@ public class JBAchievements {
         CRAFT_LUNCHBOX = AchievementProvider.getBuilder(BTWAchievementEvents.ItemEvent.class)
                 .name(loc("craft_lunchbox"))
                 .icon(JBItems.lunchbox)
-                .displayLocation(2, 1)
+                .displayLocation(3, 1)
                 .triggerCondition(stack -> stack.itemID == JBItems.lunchbox.itemID)
                 .parents(CRAFT_SATCHEL)
                 .build().registerAchievement(JEFFY_BACKPACKS);
@@ -49,6 +50,13 @@ public class JBAchievements {
                 .displayLocation(2, 0)
                 .triggerCondition(stack -> stack.itemID == JBItems.backpack.itemID)
                 .parents(CRAFT_SATCHEL)
+                .build().registerAchievement(JEFFY_BACKPACKS);
+        CRAFT_FILTER = AchievementProvider.getBuilder(BTWAchievementEvents.ItemEvent.class)
+                .name(loc("craft_filter"))
+                .icon(JBItems.filter)
+                .displayLocation(3, 0)
+                .triggerCondition(stack -> stack.itemID == JBItems.filter.itemID)
+                .parents(CRAFT_BACKPACK)
                 .build().registerAchievement(JEFFY_BACKPACKS);
     }
 }

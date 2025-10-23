@@ -2,7 +2,9 @@ package com.jeffyjamzhd.jeffybackpacks.item;
 
 import btw.item.items.ArmorItem;
 import btw.item.util.ItemUtils;
+import com.jeffyjamzhd.jeffybackpacks.api.IArmorCustomModel;
 import com.jeffyjamzhd.jeffybackpacks.inventory.FilterInventory;
+import com.jeffyjamzhd.jeffybackpacks.render.ModelBackpackBase;
 import com.jeffyjamzhd.jeffylib.api.IItemExtendedInteraction;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBPackets;
@@ -19,7 +21,8 @@ import java.util.List;
  * An item that contains a certain amount of {@link ItemStack}.
  */
 public class ItemWithInventory extends ArmorItem
-        implements IItemExtendedInteraction {
+        implements IItemExtendedInteraction, IArmorCustomModel
+{
     /**
      * The size of the inventory
      */
@@ -267,6 +270,36 @@ public class ItemWithInventory extends ArmorItem
         player.inventory.onInventoryChanged();
     }
 
+    //***       IArmorWithCustomModel        ***//
+
+    /**
+     * Armor model, assigned upon registration
+     */
+    @Environment(EnvType.CLIENT)
+    private ModelBackpackBase model;
+    @Environment(EnvType.CLIENT)
+    private boolean hasCustomModel;
+
+    @Override
+    public boolean hasCustomModel() {
+        return hasCustomModel;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public ModelBackpackBase getCustomModel() {
+        return model;
+    }
+
+    /**
+     * Sets the armor model in this {@code ItemWithInventory}
+     */
+    @Environment(EnvType.CLIENT)
+    public void setCustomModel(ModelBackpackBase model) {
+        this.model = model;
+        hasCustomModel = true;
+    }
+
     //***       Class specific methods        ***//
 
     /**
@@ -417,6 +450,20 @@ public class ItemWithInventory extends ArmorItem
     }
 
     /**
+     * {@code true} if the provided stack has the enchantment glint tag (for EMI display)
+     */
+    public boolean hasEffectEMI(ItemStack stack) {
+        if (!stack.hasTagCompound()) {
+            return false;
+        }
+        NBTTagCompound tag = stack.getTagCompound();
+        if (tag != null) {
+            return tag.hasKey("EmiEffect");
+        }
+        return false;
+    }
+
+    /**
      * Sets selected slot in provided {@link ItemStack}
      * @param slotID Slot to select
      */
@@ -462,6 +509,11 @@ public class ItemWithInventory extends ArmorItem
             secondPassIcon = register.registerIcon(getIconString() + "_overlay");
     }
 
+    @Override
+    public String getUnlocalizedName(ItemStack stack) {
+        return hasEffectEMI(stack) ? getUnlocalizedName() + ".filter" : super.getUnlocalizedName(stack);
+    }
+
     /**
      * Sends C2S sync packet for item inventory position
      */
@@ -476,11 +528,17 @@ public class ItemWithInventory extends ArmorItem
     public int getColor(ItemStack par1ItemStack) {
         NBTTagCompound var2 = par1ItemStack.getTagCompound();
         if (var2 == null) {
-            return 0xFFFFFF;
+            return -1;
         } else {
             NBTTagCompound var3 = var2.getCompoundTag("display");
-            return var3 == null ? 0xFFFFFF : (var3.hasKey("color") ? var3.getInteger("color") : 0xFFFFFF);
+            return var3 == null ? -1 : (var3.hasKey("color") ? var3.getInteger("color") : -1);
         }
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public int getColorFromItemStack(ItemStack par1ItemStack, int pass) {
+        return pass > 0 ? -1 : getColor(par1ItemStack);
     }
 
     @Override
@@ -492,13 +550,19 @@ public class ItemWithInventory extends ArmorItem
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getIconFromDamageForRenderPass(int damage, int pass) {
-        return pass == 1 && hasSecondPass ? secondPassIcon : super.getIconFromDamageForRenderPass(damage, pass);
+        return pass == 1 && hasSecondPass ? secondPassIcon : itemIcon;
+    }
+
+    @Override
+    @Environment(EnvType.CLIENT)
+    public boolean requiresMultipleRenderPasses() {
+        return hasSecondPass;
     }
 
     @Override
     @Environment(EnvType.CLIENT)
     public boolean hasEffect(ItemStack stack) {
-        return hasFilterTag(stack);
+        return hasEffectEMI(stack) || hasFilterTag(stack);
     }
 
     @Environment(EnvType.CLIENT)

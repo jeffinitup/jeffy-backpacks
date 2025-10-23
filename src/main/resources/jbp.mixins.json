@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "InventoryPlayerMixin",
+    "btw.DifficultiesMixin",
     "btw.status.StatusEffectBuilderMixin",
     "btw.status.StatusEffectMixin",
     "crafting.BulkCraftingManagerMixin",
@@ -12,7 +13,8 @@
     "emi.EmiInfoRecipeMixin",
     "entity.EntityItemMixin",
     "entity.EntityLivingBaseMixin",
-    "entity.EntityPlayerMixin"
+    "entity.EntityPlayerMixin",
+    "invoker.StatusEffectBuilderInvoker"
   ],
   "client": [
     "gui.GuiContainerMixin",

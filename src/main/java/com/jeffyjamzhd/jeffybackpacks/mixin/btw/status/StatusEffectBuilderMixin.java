@@ -1,6 +1,5 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.btw.status;
 
-import btw.util.CustomDamageSource;
 import btw.util.status.StatusEffect;
 import btw.util.status.StatusEffectBuilder;
 import com.jeffyjamzhd.jeffybackpacks.api.impl.IStatusEffectBuilder;

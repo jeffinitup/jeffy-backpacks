@@ -11,7 +11,7 @@ public class CustomArmorModel extends ModelBase {
     private ChestplateModel chestplate = null;
 
     public void setChestplateModel(ChestplateModel model) {
-
+        chestplate = model;
     }
 
     public Optional<ChestplateModel> getChestplate() {

@@ -5,6 +5,8 @@ import com.jeffyjamzhd.jeffybackpacks.registry.JBItems;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBTags;
 import net.minecraft.src.*;
 
+import java.util.Collection;
+
 public class RecipeRemoveFilter implements IRecipe {
     @Override
     public boolean matches(InventoryCrafting inventory, World world) {
@@ -19,7 +21,7 @@ public class RecipeRemoveFilter implements IRecipe {
             ItemStack stackAt = inventory.getStackInSlot(i);
             if (stackAt != null) {
                 // Test for backpack first
-                if (JBTags.TAG_BACKPACKS.test(stackAt)) {
+                if (JBTags.TAG_BACKPACKS.test(new ItemStack(stackAt.getItem()))) {
                     // Make sure it has a filter
                     ItemWithInventory itemInv = (ItemWithInventory) stackAt.getItem();
                     if (!itemInv.hasFilterTag(stackAt) || backpackStack != null)
@@ -62,11 +64,13 @@ public class RecipeRemoveFilter implements IRecipe {
             // Remove FilterInventory
             ItemStack newBackpack = input.copy();
             NBTTagCompound compound = newBackpack.getTagCompound();
-            compound = compound.getCompoundTag("BackpackInventory");
+            Collection<NBTBase> tags = compound.getTags();
 
             newBackpack.stackTagCompound = new NBTTagCompound();
-            newBackpack.stackTagCompound.setCompoundTag("BackpackInventory", compound);
-
+            tags.stream()
+                    .filter(tag -> tag instanceof NBTTagCompound)
+                    .filter(tag -> !tag.getName().equals("FilterInventory"))
+                    .forEach(tag -> newBackpack.stackTagCompound.setTag(tag.getName(), tag));
             return new ItemStack[]{newBackpack};
         }
         return null;

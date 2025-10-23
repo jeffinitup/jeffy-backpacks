@@ -1,10 +1,9 @@
-accessWidener v1 named
-accessible method net/minecraft/src/GuiContainer getSlotAtPosition (II)Lnet/minecraft/src/Slot;
+accessWidener v2 named
 accessible class net/minecraft/src/SlotCreativeInventory
 accessible class net/minecraft/src/ContainerCreative
 accessible class net/minecraft/src/SlotArmor
 accessible class emi/dev/emi/emi/api/recipe/EmiInfoRecipe$PageManager
 accessible field net/minecraft/src/Item iconString Ljava/lang/String;
+accessible method net/minecraft/src/GuiContainer getSlotAtPosition (II)Lnet/minecraft/src/Slot;
 accessible method net/minecraft/src/GuiContainer handleMouseClick (Lnet/minecraft/src/Slot;III)V
-accessible method btw/util/status/StatusEffectBuilder <init> (ILbtw/util/status/StatusCategory;)V
 accessible method net/minecraft/src/DamageSource <init> (Ljava/lang/String;)V
