@@ -1,6 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
-import btw.util.sounds.AddonSoundRegistryEntry;
+import api.util.AddonSoundRegistryEntry;
 
 public class JBSounds {
     public static final AddonSoundRegistryEntry BACKPACK_EXTRACT =

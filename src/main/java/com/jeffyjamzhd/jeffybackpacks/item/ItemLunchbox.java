@@ -1,8 +1,8 @@
 package com.jeffyjamzhd.jeffybackpacks.item;
 
+import api.item.util.ItemUtils;
 import btw.item.items.BucketItemDrinkable;
-import btw.item.util.ItemUtils;
-import btw.util.sounds.BTWSoundManager;
+import btw.util.BTWSounds;
 import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import emi.shims.java.com.unascribed.retroemi.Pair;
@@ -29,7 +29,7 @@ public class ItemLunchbox extends ItemWithInventory {
             if (canConsume(player, firstStack)) {
                 if (world.isRemote) {
                     stack.setItemDamage(foodIcons.containsKey(inv.getFirstStack().itemID) ? inv.getFirstStack().itemID : 1);
-                    player.playSound(BTWSoundManager.CHEST_OPEN.sound(),
+                    player.playSound(BTWSounds.CHEST_OPEN.sound(),
                             0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
                 }
                 player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
@@ -50,7 +50,7 @@ public class ItemLunchbox extends ItemWithInventory {
             // Run food eating method
             if (world.isRemote) {
                 stack.setItemDamage(0);
-                player.playSound(BTWSoundManager.CHEST_CLOSE.sound(),
+                player.playSound(BTWSounds.CHEST_CLOSE.sound(),
                         0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
             }
 
@@ -71,7 +71,7 @@ public class ItemLunchbox extends ItemWithInventory {
         super.onPlayerStoppedUsing(stack, world, player, duration);
         if (world.isRemote) {
             stack.setItemDamage(0);
-            player.playSound(BTWSoundManager.CHEST_CLOSE.sound(),
+            player.playSound(BTWSounds.CHEST_CLOSE.sound(),
                     0.7f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
     }
@@ -118,13 +118,13 @@ public class ItemLunchbox extends ItemWithInventory {
     public void playInsertSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(
-                    player.posX, player.posY, player.posZ, BTWSoundManager.ITEM_FRAME_ITEM_ADD.sound(),
+                    player.posX, player.posY, player.posZ, BTWSounds.ITEM_FRAME_ITEM_ADD.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
 
         if (!world.isRemote) {
             world.playSoundToNearExcept(
-                    player, BTWSoundManager.ITEM_FRAME_ITEM_ADD.sound(),
+                    player, BTWSounds.ITEM_FRAME_ITEM_ADD.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
     }
@@ -133,13 +133,13 @@ public class ItemLunchbox extends ItemWithInventory {
     public void playExtractSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(
-                    player.posX, player.posY, player.posZ, BTWSoundManager.ITEM_FRAME_ITEM_REMOVE.sound(),
+                    player.posX, player.posY, player.posZ, BTWSounds.ITEM_FRAME_ITEM_REMOVE.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
 
         if (!world.isRemote) {
             world.playSoundToNearExcept(
-                    player, BTWSoundManager.ITEM_FRAME_ITEM_REMOVE.sound(),
+                    player, BTWSounds.ITEM_FRAME_ITEM_REMOVE.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 1.4f + world.rand.nextFloat() * 0.25f);
         }
     }
@@ -148,13 +148,13 @@ public class ItemLunchbox extends ItemWithInventory {
     public void playFullSFX(World world, EntityPlayer player) {
         if (world.isRemote) {
             world.playSound(
-                    player.posX, player.posY, player.posZ, BTWSoundManager.ITEM_FRAME_ITEM_ROTATE.sound(),
+                    player.posX, player.posY, player.posZ, BTWSounds.ITEM_FRAME_ITEM_ROTATE.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 0.6f + world.rand.nextFloat() * 0.25f);
         }
 
         if (!world.isRemote) {
             world.playSoundToNearExcept(
-                    player, BTWSoundManager.ITEM_FRAME_ITEM_ROTATE.sound(),
+                    player, BTWSounds.ITEM_FRAME_ITEM_ROTATE.sound(),
                     0.9f + world.rand.nextFloat() * 0.1f, 0.6f + world.rand.nextFloat() * 0.25f);
         }
     }
@@ -195,23 +195,29 @@ public class ItemLunchbox extends ItemWithInventory {
         for (Item item : Item.itemsList) {
             if (isValidFood(item, 0)) {
                 // Parse icon string
-                String name = item.iconString;
-                if (name.startsWith("btw:")) {
-                    name = name.substring(4);
+                String[] name = item.iconString.split(":");
+                if (name.length < 2) {
+                    if (name[0].startsWith("fc"))
+                        name = new String[]{"btw", name[0]};
+                    else
+                        name = new String[]{"minecraft", name[0]};
                 }
+                if (name[1].startsWith("btw:"))
+                    name[1] = name[1].substring(4);
 
+                String loc = name[0] + ":textures/items/lunchbox_" + name[1] + ".png";
                 try {
                     // Check if the icon exists, perhaps a bit inefficiently
-                    ResourceLocation location = new ResourceLocation("jbp", "textures/items/lunchbox/lunchbox_" + name + ".png");
-                    Minecraft.getMinecraft().getResourceManager().getResource(location);
+                    ResourceLocation resLoc = new ResourceLocation(loc);
+                    Minecraft.getMinecraft().getResourceManager().getResource(resLoc);
 
                     // It will have thrown an exception at this point, so register icon
                     // since it exists
-                    Icon icon = register.registerIcon("jbp:lunchbox/lunchbox_" + name);
+                    Icon icon = register.registerIcon(name[0] + ":lunchbox_" + name[1]);
                     foodIcons.put(item.itemID, icon);
                 } catch (Exception e) {
                     // Make it known an icon doesn't exist for that food item
-                    JeffyBackpacks.logInfo("Could not find custom lunchbox icon for " + name);
+                    JeffyBackpacks.logWarning("Could not find custom lunchbox icon at directory: " + loc);
                 }
             }
         }

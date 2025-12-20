@@ -1,6 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
-import btw.item.tag.Tag;
+import api.item.tag.Tag;
 import net.minecraft.src.ResourceLocation;
 
 public class JBTags {

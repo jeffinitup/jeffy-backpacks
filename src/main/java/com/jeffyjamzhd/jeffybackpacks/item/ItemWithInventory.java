@@ -1,7 +1,7 @@
 package com.jeffyjamzhd.jeffybackpacks.item;
 
-import btw.item.items.ArmorItem;
-import btw.item.util.ItemUtils;
+import api.item.items.ArmorItem;
+import api.item.util.ItemUtils;
 import com.jeffyjamzhd.jeffybackpacks.api.IArmorCustomModel;
 import com.jeffyjamzhd.jeffybackpacks.inventory.FilterInventory;
 import com.jeffyjamzhd.jeffybackpacks.render.ModelBackpackBase;

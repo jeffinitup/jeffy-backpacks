@@ -1,6 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.api.impl;
 
-import btw.util.status.StatusEffectBuilder;
+import api.util.status.StatusEffectBuilder;
 import net.minecraft.src.DamageSource;
 
 public interface IStatusEffectBuilder {

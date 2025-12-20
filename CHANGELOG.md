@@ -1,6 +1,10 @@
 # Jeffy Backpacks Changelog
 Addon created by jeffyjamzhd, for use with Better Than Wolves CE.
 Special thanks to superdave for doing the branding art!
+## Version 0.3.1
+* Updated the mod to BTWCE 3.0
+* Refactored lunchbox icon registry, which are now placed within respective mod namespaces. Expected asset locations are logged on startup if no asset is present
+* Fixed server crash
 ---
 ## Version 0.3
 * Added Filters, which lets you define what items can or cant be picked up by a worn backpack

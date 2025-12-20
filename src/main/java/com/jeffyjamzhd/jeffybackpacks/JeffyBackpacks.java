@@ -1,7 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks;
 
-import btw.BTWAddon;
-import btw.world.util.difficulty.Difficulty;
+import api.BTWAddon;
 import com.jeffyjamzhd.jeffybackpacks.registry.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.Item;
@@ -53,7 +52,16 @@ public class JeffyBackpacks extends BTWAddon {
      * Logs information in addon logger, formatted with {@code args}
      */
     public static void logInfo(String message, Object... args) {
-        instance.logger.info(message, args);
+        if (instance != null)
+            instance.logger.info(message, args);
+    }
+
+    /**
+     * Logs warning in addon logger, formatted with {@code args}
+     */
+    public static void logWarning(String message, Object... args) {
+        if (instance != null)
+            instance.logger.warn(message, args);
     }
 
     /**
@@ -61,6 +69,13 @@ public class JeffyBackpacks extends BTWAddon {
      */
     public static void logInfo(String message) {
         logInfo(message, new Object[0]);
+    }
+
+    /**
+     * Logs warning in addon logger
+     */
+    public static void logWarning(String message) {
+        logWarning(message, new Object[0]);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.btw.status;
 
-import btw.util.status.StatusEffect;
+import api.util.status.StatusEffect;
 import com.jeffyjamzhd.jeffybackpacks.api.impl.IStatusEffect;
 import net.minecraft.src.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;

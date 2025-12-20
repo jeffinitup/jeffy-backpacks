@@ -1,7 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.entity;
 
-import btw.util.status.StatusCategory;
-import btw.util.status.StatusEffect;
+import api.util.status.StatusEffect;
 import com.jeffyjamzhd.jeffybackpacks.api.impl.IEntityPlayer;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import com.jeffyjamzhd.jeffybackpacks.registry.JBSounds;

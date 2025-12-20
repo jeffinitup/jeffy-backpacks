@@ -1,9 +1,9 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.crafting;
 
+import api.inventory.InventoryUtils;
+import api.item.tag.TagOrStack;
 import btw.crafting.manager.BulkCraftingManager;
 import btw.crafting.recipe.types.BulkRecipe;
-import btw.inventory.util.InventoryUtils;
-import btw.item.tag.TagOrStack;
 import com.jeffyjamzhd.jeffybackpacks.inventory.BackpackInventory;
 import com.jeffyjamzhd.jeffybackpacks.item.ItemWithInventory;
 import com.llamalad7.mixinextras.sugar.Local;

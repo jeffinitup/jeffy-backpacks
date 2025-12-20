@@ -1,7 +1,7 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.invoker;
 
-import btw.util.status.StatusCategory;
-import btw.util.status.StatusEffectBuilder;
+import api.util.status.StatusCategory;
+import api.util.status.StatusEffectBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 

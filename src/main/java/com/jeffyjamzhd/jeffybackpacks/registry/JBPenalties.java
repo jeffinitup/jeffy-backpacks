@@ -1,16 +1,12 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
-import btw.util.status.StatusCategory;
-import btw.util.status.StatusEffect;
-import btw.util.status.StatusEffectBuilder;
-import btw.world.util.difficulty.Difficulty;
-import btw.world.util.difficulty.DifficultyParam;
+import api.util.status.StatusCategory;
+import api.util.status.StatusEffect;
+import api.util.status.StatusEffectBuilder;
 import com.jeffyjamzhd.jeffybackpacks.JeffyBackpacks;
 import com.jeffyjamzhd.jeffybackpacks.mixin.invoker.StatusEffectBuilderInvoker;
 import net.minecraft.src.DamageSource;
 import net.minecraft.src.World;
-
-import java.util.Optional;
 
 public class JBPenalties {
     public static DamageSource DAMAGE_CRUSHED = new DamageSource("crushed")

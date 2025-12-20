@@ -1,6 +1,6 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.entity;
 
-import btw.util.status.StatusEffect;
+import api.util.status.StatusEffect;
 import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityPlayer;
 import org.spongepowered.asm.mixin.Mixin;

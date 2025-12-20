@@ -1,7 +1,8 @@
 package com.jeffyjamzhd.jeffybackpacks.mixin.btw.status;
 
-import btw.util.status.StatusEffect;
-import btw.util.status.StatusEffectBuilder;
+import api.util.status.StatusEffectBuilder;
+import api.util.status.StatusEffect;
+import api.util.status.StatusEffectBuilder;
 import com.jeffyjamzhd.jeffybackpacks.api.impl.IStatusEffectBuilder;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.src.DamageSource;

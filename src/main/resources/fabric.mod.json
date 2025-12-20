@@ -26,8 +26,8 @@
     "loom:injected_interfaces": {
       "net/minecraft/src/InventoryPlayer": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IInventoryPlayer"],
       "net/minecraft/src/EntityPlayer": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IEntityPlayer"],
-      "btw/util/status/StatusEffectBuilder": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffectBuilder"],
-      "btw/util/status/StatusEffect": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffect"]
+      "api/util/status/StatusEffectBuilder": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffectBuilder"],
+      "api/util/status/StatusEffect": ["com/jeffyjamzhd/jeffybackpacks/api/impl/IStatusEffect"]
     }
   },
   "mixins": [
@@ -37,6 +37,7 @@
   "depends": {
     "fabricloader": ">=0.15.6",
     "minecraft": "1.6.4",
-    "jl": ">=0.1.0"
+    "jl": ">=0.1.1",
+    "btw": ">=3.0.0"
   }
 }

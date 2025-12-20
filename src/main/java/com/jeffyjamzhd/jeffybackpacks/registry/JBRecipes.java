@@ -1,11 +1,11 @@
 package com.jeffyjamzhd.jeffybackpacks.registry;
 
+import api.item.tag.TagInstance;
+import api.item.tag.TagOrStack;
 import btw.block.BTWBlocks;
 import btw.crafting.recipe.RecipeManager;
 import btw.item.BTWItems;
-import btw.item.tag.BTWTags;
-import btw.item.tag.TagInstance;
-import btw.item.tag.TagOrStack;
+import btw.item.BTWTags;
 import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeAddFilter;
 import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeBundle;
 import com.jeffyjamzhd.jeffybackpacks.api.recipe.RecipeRemoveFilter;
